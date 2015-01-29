@@ -5,3 +5,4 @@
 - cl/tail.lisp. Simulate the Linux tail command.
 - cl/cp.lisp. Simulate the Linux cp command.
 - cl/cat.lisp. Simulate the Linux cat command.
+- cl/grep.lisp. Simulate the Linux grep command.
