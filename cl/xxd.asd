@@ -8,6 +8,6 @@
 (defsystem :liutos.cli.xxd
   :author "Liutos <mat.liutos@gmail.com>"
   :version "0.0.1"
-  :description "Simulate the Linux xxd command."
+  :description "Simulate the xxd command."
   :depends-on ()
   :components ((:file "xxd")))

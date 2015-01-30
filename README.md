@@ -6,3 +6,4 @@
 - cl/cp.lisp. Simulate the Linux cp command.
 - cl/cat.lisp. Simulate the Linux cat command.
 - cl/grep.lisp. Simulate the Linux grep command.
+- cl/xxd.lisp. Simulate the Linux xxd command.
