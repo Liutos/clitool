@@ -15,9 +15,19 @@
   (let ((l2 (vector-pop stack))
         (l1 (vector-pop stack)))
     (let ((val (case ins
-                 (* (* l1 l2)))))
+                 (+ (+ l1 l2))
+                 (- (- l1 l2))
+                 (* (* l1 l2))
+                 (/ (/ l1 l2))
+                 (= (= l1 l2)))))
       (vector-push-extend val stack)
       (values seq stack))))
+
+(defun interp-cr (ins stack seq)
+  "Print a carriage return character."
+  (declare (ignorable ins stack seq))
+  (format t "~%")
+  (values seq stack))
 
 (defun interp-drop (ins stack seq)
   "Remove the top of stack."
@@ -69,26 +79,88 @@
              (if seq
                  (let ((ins (pop seq)))
                    (when (eq '|;| ins)
-                     (return-from aux (nreverse body)))
+                     (return-from aux
+                       (values seq (nreverse body))))
                    (push ins body)
                    (aux seq body))
-                 (nreverse body))))
-    (let ((name (pop seq))
-          (body (aux seq '())))
-      (setf (gethash name *forth-dict*) body))))
+                 (values seq (nreverse body)))))
+    (let ((name (pop seq)))
+      (multiple-value-bind (seq body)
+          (aux seq '())
+        (setf (gethash name *forth-dict*) body)
+        (values seq body)))))
+
+;;; 返回包括接下来的指令序列和过程体
+(defun interp-begin-aux2 (seq)
+  "Pop instructions until got REPEAT."
+  (let ((rest '()))
+    (loop
+       :for (ins . tail) :on seq
+       :until (eq 'repeat ins)
+       :do (push ins rest)
+       :finally (return-from interp-begin-aux2
+                  (values tail (nreverse rest))))))
+
+;;; 遇到UNTIL时终止，或
+;;; 遇到WHILE时继续读取，直到遇到REPEAT
+;;; 返回包括：指令序列，循环过程体，条件部分，语法类型(:UNTIL|:REPEAT)
+(defun interp-begin-aux (seq body)
+  (let ((ins (pop seq)))
+    (cond ((eq 'until ins)
+           (let ((cnd (pop body)))
+             (values seq (nreverse body) (list cnd) :until)))
+          ((eq 'while ins)
+           (let ((cnd (pop body)))
+             (multiple-value-bind (seq rest)
+                 (interp-begin-aux2 seq)
+               (values seq
+                       (list (nreverse body) rest)
+                       (list cnd) :repeat))))
+          (t (interp-begin-aux seq (cons ins body))))))
+
+(defun interp-begin-until (stack body cnd)
+  "Execute body until given condition reached."
+  (forth-eat body stack)
+  (forth-eat cnd stack)
+  (let ((e (vector-pop stack)))
+    (unless e
+      (interp-begin-until stack body cnd))))
+
+(defun interp-begin-repeat (stack body-before body-after cnd)
+  "Execute the first part, check condition and execute the second part if condition is not satisfied."
+  (forth-eat body-before stack)
+  (forth-eat cnd stack)
+  (let ((e (vector-pop stack)))
+    (unless e
+      (forth-eat body-after stack)
+      (interp-begin-repeat stack body-before body-after cnd))))
+
+;;; 包括了了两种语法
+;;; 第一种：BEGIN ... cond UNTIL
+;;; 第二种：BEGIN ... cond WHILE ... REPEAT
+(defun interp-begin (ins stack seq)
+  "Loop"
+  (declare (ignore ins))
+  (multiple-value-bind (seq bodys cnd kind)
+      (interp-begin-aux seq '())
+    (case kind
+      (:until (interp-begin-until stack bodys cnd))
+      (:repeat (interp-begin-repeat stack (first bodys) cnd (second bodys))))
+    (values seq stack)))
 
 ;;; 根据给定指令的类型执行不同的逻辑
 (defun interp (ins stack seq)
   "Interpret a single instruction."
   (cond ((numberp ins) (interp-number ins stack seq))
         ((eq '|.| ins) (interp-point ins stack seq))
-        ((eq 'dup ins) (interp-dup ins stack seq)
-         (values seq stack))
+        ((eq 'cr ins) (interp-cr ins stack seq))
+        ((eq 'dup ins) (interp-dup ins stack seq))
         ((eq 'swap ins) (interp-swap ins stack seq))
         ((eq '|:| ins) (interp-define seq))
-        ((eq '* ins) (interp-arith ins stack seq))
+        ((member ins '(+ - * / =)) (interp-arith ins stack seq))
         ((eq 'tuck ins) (interp-tuck ins stack seq))
         ((eq 'drop ins) (interp-drop ins stack seq))
+        ((eq 'begin ins) (interp-begin ins stack seq))
         ((gethash ins *forth-dict*)
          (let ((stack (nth-value 1 (forth-eat (gethash ins *forth-dict*) stack))))
            (values seq stack)))
