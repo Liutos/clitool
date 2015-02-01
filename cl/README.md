@@ -8,3 +8,4 @@
 - grep/grep.lisp. Simulate the Linux grep command.
 - xxd/xxd.lisp. Simulate the Linux xxd command.
 - ls/main.lisp. Simulate the Linux ls command.
+- forth/main.lisp. A trivial implementation of Forth language.
