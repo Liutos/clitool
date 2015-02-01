@@ -19,7 +19,8 @@
                  (- (- l1 l2))
                  (* (* l1 l2))
                  (/ (/ l1 l2))
-                 (= (= l1 l2)))))
+                 (= (= l1 l2))
+                 (mod (mod l1 l2)))))
       (vector-push-extend val stack)
       (values seq stack))))
 
@@ -57,8 +58,11 @@
 (defun interp-tuck (ins stack seq)
   "Push the last but two element onto stack."
   (declare (ignore ins))
-  (let ((e (aref stack (- (fill-pointer stack) 2))))
-    (vector-push-extend e stack)
+  (let ((l1 (vector-pop stack))
+        (l2 (vector-pop stack)))
+    (vector-push-extend l1 stack)
+    (vector-push-extend l2 stack)
+    (vector-push-extend l1 stack)
     (values seq stack)))
 
 (defun interp-swap (ins stack seq)
@@ -131,7 +135,7 @@
   (forth-eat body-before stack)
   (forth-eat cnd stack)
   (let ((e (vector-pop stack)))
-    (unless e
+    (unless (or (null e) (zerop e))
       (forth-eat body-after stack)
       (interp-begin-repeat stack body-before body-after cnd))))
 
@@ -145,7 +149,7 @@
       (interp-begin-aux seq '())
     (case kind
       (:until (interp-begin-until stack bodys cnd))
-      (:repeat (interp-begin-repeat stack (first bodys) cnd (second bodys))))
+      (:repeat (interp-begin-repeat stack (first bodys) (second bodys) cnd)))
     (values seq stack)))
 
 ;;; 根据给定指令的类型执行不同的逻辑
@@ -157,7 +161,7 @@
         ((eq 'dup ins) (interp-dup ins stack seq))
         ((eq 'swap ins) (interp-swap ins stack seq))
         ((eq '|:| ins) (interp-define seq))
-        ((member ins '(+ - * / =)) (interp-arith ins stack seq))
+        ((member ins '(+ - * / = mod)) (interp-arith ins stack seq))
         ((eq 'tuck ins) (interp-tuck ins stack seq))
         ((eq 'drop ins) (interp-drop ins stack seq))
         ((eq 'begin ins) (interp-begin ins stack seq))
