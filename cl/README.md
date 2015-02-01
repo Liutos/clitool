@@ -10,3 +10,4 @@
 - ls/main.lisp. Simulate the Linux ls command.
 - forth/main.lisp. A trivial implementation of Forth language.
 - wc/main.lisp. Simulate the Linux wc command.
+- readelf/main.lisp. Simulate the Linux readelf command.
