@@ -38,6 +38,36 @@
                (4 "CORE (Core file)"))))
     (format t "Type: ~A~%" msg)))
 
+(defun bytes-to-num (bytes)
+  "Convert bytes into a integer."
+  (let ((sum 0) (len (length bytes)))
+    (dotimes (i len sum)
+      (setf sum (+ (* sum 256) (aref bytes (- len i 1)))))))
+
+(defun machine-print (machine)
+  "Displays information about target machine."
+  (let* ((machine (bytes-to-num machine))
+         (msg (case machine
+                (#x02 "SPARC")
+                (#x03 "Intel 80386")
+                (#x08 "MIPS")
+                (#x14 "PowerPC")
+                (#x28 "ARM")
+                (#x2A "SuperH")
+                (#x32 "IA-64")
+                (#x3E "x86-64")
+                (#xB7 "AArch64"))))
+    (format t "Machine: ~A~%" msg)))
+
+(defun entry-print (stream &optional (clz 1))
+  "Displays information about entry address."
+  (let* ((len (if (= clz 1) 4 8))
+         (entry (make-array len)))
+    (read-sequence entry stream)
+    (format t "Entry point address: 0x")
+    (format t "~(~X~)" (bytes-to-num entry)) ;使用~(~)包裹~X来输出小写的十六进制表示
+    (format t "~%")))
+
 (defun readelf (file)
   "Displays information about ELF files."
   (with-open-file (s file :element-type '(unsigned-byte 8))
@@ -71,5 +101,17 @@
     ;;; PAD字段，未使用
     (let ((pad (make-array 7)))
       (read-sequence pad s))
-    (let ((type (read-byte s)))
-      (type-print type))))
+    ;;; 区分文件类型，包括可重定向文件、可执行文件、共享目标文件以及核文件
+    (let ((type (make-array 2)))
+      (read-sequence type s)
+      (type-print (bytes-to-num type)))
+    ;;; 该字节描述目标机器架构
+    (let ((machine (make-array 2)))
+      (read-sequence machine s)
+      (machine-print machine))
+    ;;; 该字节始终为1
+    (let ((ver (make-array 4)))
+      (read-sequence ver s)
+      (format t "Version: 0x~X~%" (bytes-to-num ver)))
+    ;;; 接下来的4/8个字节表示进程开始执行的内存位置
+    (entry-print s)))
