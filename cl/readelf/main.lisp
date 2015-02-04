@@ -6,6 +6,17 @@
 
 (in-package :liutos.cli.readelf)
 
+(defclass elf ()
+  ((mag :documentation "The first 16 bytes")
+   (clz :documentation "The byte to signify 32- or 64-bit format")
+   (dat :documentation "The byte to signify little or big endianness")
+   (ver :documentation "Set to 1 for the original version of ELF")
+   (osabi :documentation "Identifies the target operating system ABI")
+   (abiver :documentation "Specifies the ABI version")
+   (pad :documentation "Currently unused")
+   (type :documentation "Specifies the relocatable/executable/shared/core file type")
+   ()))                                 ; TODO: 继续补充
+
 (defparameter *byte1*
   (parse-integer "7F" :radix 16))
 (defparameter *byte2*
