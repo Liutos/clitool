@@ -68,6 +68,22 @@
     (format t "~(~X~)" (bytes-to-num entry)) ;使用~(~)包裹~X来输出小写的十六进制表示
     (format t "~%")))
 
+(defun phoff-print (stream &optional (clz 1))
+  "Displays information about header table."
+  (let* ((len (if (= clz 1) 4 8))
+         (phoff (make-array len)))
+    (read-sequence phoff stream)
+    (format t "Start of program headers: ~D (bytes info file)~%"
+            (bytes-to-num phoff))))
+
+(defun shoff-print (stream &optional (clz 1))
+  "Displays information about section header table."
+  (let* ((len (if (= clz 1) 4 8))
+         (phoff (make-array len)))
+    (read-sequence phoff stream)
+    (format t "Start of section headers: ~D (bytes info file)~%"
+            (bytes-to-num phoff))))
+
 (defun readelf (file)
   "Displays information about ELF files."
   (with-open-file (s file :element-type '(unsigned-byte 8))
@@ -114,4 +130,34 @@
       (read-sequence ver s)
       (format t "Version: 0x~X~%" (bytes-to-num ver)))
     ;;; 接下来的4/8个字节表示进程开始执行的内存位置
-    (entry-print s)))
+    (entry-print s)
+    ;;; 接下来的4/8个字节表示程序头部表的起始位置
+    (phoff-print s)
+    ;;; 接下来的4/8个字节表示段头部表的起始位置
+    (shoff-print s)
+    ;;; flags的具体含义依赖于机器架构
+    (let ((flags (make-array 4)))
+      (read-sequence flags s)
+      (format t "Flags: 0x~X~%" (bytes-to-num flags)))
+    ;;; 该头部的体积大小，一般32位即为32字节而64位系统即为64字节
+    (let ((ehsize (make-array 2)))
+      (read-sequence ehsize s)
+      (format t "Size of this header: ~D (bytes)~%" (bytes-to-num ehsize)))
+    ;;; 该字节表示程序头部表入口的大小
+    (let ((phentsize (make-array 2)))
+      (read-sequence phentsize s)
+      (format t "Size of program headers: ~D (bytes)~%" (bytes-to-num phentsize)))
+    ;;; 程序头部表的数量
+    (let ((phnum (make-array 2)))
+      (read-sequence phnum s)
+      (format t "Number of program headers: ~D~%" (bytes-to-num phnum)))
+    ;;; 段头部表入口的体积
+    (let ((shentsize (make-array 2)))
+      (read-sequence shentsize s)
+      (format t "Size of section headers: ~D (bytes)~%" (bytes-to-num shentsize)))
+    (let ((shnum (make-array 2)))
+      (read-sequence shnum s)
+      (format t "Number of section headers: ~D~%" (bytes-to-num shnum)))
+    (let ((shstrndx (make-array 2)))
+      (read-sequence shstrndx s)
+      (format t "Section header string table index: ~D~%" (bytes-to-num shstrndx)))))
