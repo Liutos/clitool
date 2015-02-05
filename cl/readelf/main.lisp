@@ -7,15 +7,138 @@
 (in-package :liutos.cli.readelf)
 
 (defclass elf ()
-  ((mag :documentation "The first 16 bytes")
-   (clz :documentation "The byte to signify 32- or 64-bit format")
-   (dat :documentation "The byte to signify little or big endianness")
-   (ver :documentation "Set to 1 for the original version of ELF")
-   (osabi :documentation "Identifies the target operating system ABI")
-   (abiver :documentation "Specifies the ABI version")
-   (pad :documentation "Currently unused")
-   (type :documentation "Specifies the relocatable/executable/shared/core file type")
-   ()))                                 ; TODO: 继续补充
+  ((mag :documentation "The first 16 bytes"
+        :accessor elf-mag)
+   (clz :documentation "The byte to signify 32- or 64-bit format"
+        :accessor elf-clz)
+   (dat :documentation "The byte to signify little or big endianness"
+        :accessor elf-dat)
+   (ver :documentation "Set to 1 for the original version of ELF"
+        :accessor elf-ver)
+   (osabi :documentation "Identifies the target operating system ABI"
+          :accessor elf-osabi)
+   (abiver :documentation "Specifies the ABI version"
+           :accessor elf-abiver)
+   (pad :documentation "Currently unused"
+        :accessor elf-pad)
+   (type :documentation "Specifies the relocatable/executable/shared/core file type"
+         :accessor elf-type)
+   (machine :documentation "Specifies target instruction set architecture"
+            :accessor elf-machine)
+   (ver2 :documentation "Set to 1 for the original version of ELF"
+         :accessor elf-ver2)
+   (entry :documentation "Memory address where the process start executing"
+          :accessor elf-entry)
+   (phoff :documentation "Start of the program header table"
+          :accessor elf-phoff)
+   (shoff :documentation "Start of the section header table"
+          :accessor elf-shoff)
+   (flags :documentation "Depends on the target architecture"
+          :accessor elf-flags)
+   (ehsize :documentation "Size of ELF header"
+           :accessor elf-ehsize)
+   (phentsize :documentation "Size of program header table entry"
+              :accessor elf-phentsize)
+   (phnum :documentation "Number of entries in program header table"
+          :accessor elf-phnum)
+   (shentsize :documentation "Size of section header table entry"
+              :accessor elf-shentsize)
+   (shnum :documentation "Number of entries in section header table"
+          :accessor elf-shnum)
+   (shstrndx :documentation "Contains index of the section header table entry that contains the section name"
+             :accessor elf-shstrndx)))
+
+(defun bytes-to-num (bytes)
+  "Convert bytes into a integer."
+  (let ((sum 0) (len (length bytes)))
+    (dotimes (i len sum)
+      (setf sum (+ (* sum 256) (aref bytes (- len i 1)))))))
+
+(defun read-bytes (s len &optional (numberp nil))
+  "Read bytes in given number."
+  (let ((bytes (make-array len)))
+    (read-sequence bytes s)
+    (if numberp (bytes-to-num bytes) bytes)))
+
+(defun elf-parse (file)
+  "Read from ELF file and generate an instance of class ELF."
+  (with-open-file (s file :element-type '(unsigned-byte 8))
+    (let* ((mag (read-bytes s 4))
+           (clz (read-bytes s 1 t))
+           (dat (read-bytes s 1 t))
+           (ver (read-bytes s 1 t))
+           (osabi (read-bytes s 1 t))
+           (abiver (read-bytes s 1 t))
+           (pad (read-bytes s 7))
+           (type (read-bytes s 2 t))
+           (machine (read-bytes s 2 t))
+           (ver2 (read-bytes s 4 t))
+           (entry (read-bytes s (if (= clz 1) 4 8) t))
+           (phoff (read-bytes s (if (= clz 1) 4 8) t))
+           (shoff (read-bytes s (if (= clz 1) 4 8) t))
+           (flags (read-bytes s 4 t))
+           (ehsize (read-bytes s 2 t))
+           (phentsize (read-bytes s 2 t))
+           (phnum (read-bytes s 2 t))
+           (shentsize (read-bytes s 2 t))
+           (shnum (read-bytes s 2 t))
+           (shstrndx (read-bytes s 2 t))
+           (ins (make-instance 'elf)))
+      (setf (elf-mag ins) mag)
+      (setf (elf-clz ins) clz)
+      (setf (elf-dat ins) dat)
+      (setf (elf-ver ins) ver)
+      (setf (elf-osabi ins) osabi)
+      (setf (elf-abiver ins) abiver)
+      (setf (elf-pad ins) pad)
+      (setf (elf-type ins) type)
+      (setf (elf-machine ins) machine)
+      (setf (elf-ver2 ins) ver2)
+      (setf (elf-entry ins) entry)
+      (setf (elf-phoff ins) phoff)
+      (setf (elf-shoff ins) shoff)
+      (setf (elf-flags ins) flags)
+      (setf (elf-ehsize ins) ehsize)
+      (setf (elf-phentsize ins) phentsize)
+      (setf (elf-phnum ins) phnum)
+      (setf (elf-shentsize ins) shentsize)
+      (setf (elf-shnum ins) shnum)
+      (setf (elf-shstrndx ins) shstrndx)
+      ins)))
+
+(defun abi2string (osabi)
+  "Convert OS ABI to correspoding name."
+  (case osabi
+    (#x00 "UNIX - System V")
+    (#x01 "HP-UX")
+    (#x02 "NetBSD")
+    (#x03 "Linux")
+    (#x06 "Solaris")
+    (#x07 "AIX")
+    (#x08 "IRIX")
+    (#x09 "FreeBSD")
+    (#x0C "OpenBSD")))
+
+(defun type2string (type)
+  "Convert ELF type to correspoding name."
+  (case type
+    (1 "REL (Relocatable file)")
+    (2 "EXEC (Executable file)")
+    (3 "DYN (Shared object file)")
+    (4 "CORE (Core file)")))
+
+(defun machine2string (machine)
+  "Convert machine field to corresponding name."
+  (case machine
+    (#x02 "SPARC")
+    (#x03 "Intel 80386")
+    (#x08 "MIPS")
+    (#x14 "PowerPC")
+    (#x28 "ARM")
+    (#x2A "SuperH")
+    (#x32 "IA-64")
+    (#x3E "x86-64")
+    (#xB7 "AArch64")))
 
 (defparameter *byte1*
   (parse-integer "7F" :radix 16))
@@ -28,147 +151,65 @@
 
 (defun abi-print (abi)
   "Displays information about OS ABI."
-  (let ((msg (case abi
-               (#x00 "System V")
-               (#x01 "HP-UX")
-               (#x02 "NetBSD")
-               (#x03 "Linux")
-               (#x06 "Solaris")
-               (#x07 "AIX")
-               (#x08 "IRIX")
-               (#x09 "FreeBSD")
-               (#x0C "OpenBSD"))))
-    (format t "OS/ABI: ~A~%" msg)))
+  (let ((msg (abi2string abi)))
+    (elf-kv-print "OS/ABI" msg)))
 
 (defun type-print (type)
   "Displays information about ELF type."
-  (let ((msg (case type
-               (1 "REL (Relocatable file)")
-               (2 "EXEC (Executable file)")
-               (3 "DYN (Shared object file)")
-               (4 "CORE (Core file)"))))
-    (format t "Type: ~A~%" msg)))
-
-(defun bytes-to-num (bytes)
-  "Convert bytes into a integer."
-  (let ((sum 0) (len (length bytes)))
-    (dotimes (i len sum)
-      (setf sum (+ (* sum 256) (aref bytes (- len i 1)))))))
+  (let ((msg (type2string type)))
+    (elf-kv-print "Type" msg)))
 
 (defun machine-print (machine)
   "Displays information about target machine."
-  (let* ((machine (bytes-to-num machine))
-         (msg (case machine
-                (#x02 "SPARC")
-                (#x03 "Intel 80386")
-                (#x08 "MIPS")
-                (#x14 "PowerPC")
-                (#x28 "ARM")
-                (#x2A "SuperH")
-                (#x32 "IA-64")
-                (#x3E "x86-64")
-                (#xB7 "AArch64"))))
-    (format t "Machine: ~A~%" msg)))
+  (let ((msg (machine2string machine)))
+    (elf-kv-print "Machine" msg)))
 
-(defun entry-print (stream &optional (clz 1))
+(defun entry-print (entry)
   "Displays information about entry address."
-  (let* ((len (if (= clz 1) 4 8))
-         (entry (make-array len)))
-    (read-sequence entry stream)
-    (format t "Entry point address: 0x")
-    (format t "~(~X~)" (bytes-to-num entry)) ;使用~(~)包裹~X来输出小写的十六进制表示
-    (format t "~%")))
+  (elf-kv-print "Entry point address"
+                (format nil "0x~(~X~)" entry)))
 
-(defun phoff-print (stream &optional (clz 1))
+(defun phoff-print (phoff)
   "Displays information about header table."
-  (let* ((len (if (= clz 1) 4 8))
-         (phoff (make-array len)))
-    (read-sequence phoff stream)
-    (format t "Start of program headers: ~D (bytes info file)~%"
-            (bytes-to-num phoff))))
+  (elf-kv-print "Start of program headers"
+                (format nil "~D (bytes into file)" phoff)))
 
-(defun shoff-print (stream &optional (clz 1))
+(defun shoff-print (shoff)
   "Displays information about section header table."
-  (let* ((len (if (= clz 1) 4 8))
-         (phoff (make-array len)))
-    (read-sequence phoff stream)
-    (format t "Start of section headers: ~D (bytes info file)~%"
-            (bytes-to-num phoff))))
+  (elf-kv-print "Start of section headers"
+                (format nil "~D (bytes into file)" shoff)))
+
+(defun elf-kv-print (key value)
+  (format t "~A: ~A~%" key value))
+
+(defun elf-file-header-print (elf)
+  "Displays the information contained in the ELF header at the start of the file."
+  (let ((clz (elf-clz elf)))
+    (elf-kv-print "Class" (format nil "ELF~D" (if (= clz 1) 32 64))))
+  (let ((dat (elf-dat elf)))
+    (elf-kv-print "Data" (format nil "2' complement, ~A endian"
+                                 (if (= dat 1) "littel" "big"))))
+  (elf-kv-print "Version" (format nil "~D (current)" (elf-ver elf)))
+  (abi-print (elf-osabi elf))
+  (elf-kv-print "ABI Version" (elf-abiver elf))
+  (type-print (elf-type elf))
+  (machine-print (elf-machine elf))
+  (elf-kv-print "Version" (format nil "0x~X" (elf-ver2 elf)))
+  (entry-print (elf-entry elf))
+  (phoff-print (elf-phoff elf))
+  (shoff-print (elf-shoff elf))
+  (elf-kv-print "Flags" (format nil "0x~X" (elf-flags elf)))
+  (elf-kv-print "Size of this header"
+                (format nil "~D (bytes)" (elf-ehsize elf)))
+  (elf-kv-print "Size of program headers"
+                (format nil "~D (bytes)" (elf-phentsize elf)))
+  (elf-kv-print "Number of program headers" (elf-phnum elf))
+  (elf-kv-print "Size of section headers"
+                (format nil "~D (bytes)" (elf-shentsize elf)))
+  (elf-kv-print "Number of section headers" (elf-shnum elf))
+  (elf-kv-print "Section header string table index" (elf-shstrndx elf)))
 
 (defun readelf (file)
   "Displays information about ELF files."
-  (with-open-file (s file :element-type '(unsigned-byte 8))
-    ;;; 检查头部，第一个字节为0x7F，后面三个字节为ELF
-    (let ((part (make-array 4)))
-      (read-sequence part s)
-      (unless (= *byte1* (aref part 0))
-        (error "第一个字节必须为0x7F"))
-      (unless (and (= *byte2* (aref part 1))
-                   (= *byte3* (aref part 2))
-                   (= *byte4* (aref part 3)))
-        (error "第二、三、四个字节必须依次为E、L和F")))
-    ;;; 该字节标记文件用于32位还是64位系统
-    (let ((clz (read-byte s)))
-      (if (= clz 1)
-          (format t "Class: ELF32~%")
-          (format t "Class: ELF64~%")))
-    ;;; 该字节标记文件用于小端还是大端字节序
-    (let ((dat (read-byte s)))
-      (if (= dat 1)
-          (format t "Data: 2's complement, little endian~%")
-          (format t "Date: 2's complement, big endian~%")))
-    ;;; 该字节始终为1
-    (let ((ver (read-byte s)))
-      (format t "Version: ~D (current)~%" ver))
-    ;;; 该字节描述了文件用于的操作系统二进制应用接口(ABI)
-    (let ((abi (read-byte s)))
-      (abi-print abi))
-    ;;; 该字节描述ABI的版本
-    (format t "ABI Version: ~D~%" (read-byte s))
-    ;;; PAD字段，未使用
-    (let ((pad (make-array 7)))
-      (read-sequence pad s))
-    ;;; 区分文件类型，包括可重定向文件、可执行文件、共享目标文件以及核文件
-    (let ((type (make-array 2)))
-      (read-sequence type s)
-      (type-print (bytes-to-num type)))
-    ;;; 该字节描述目标机器架构
-    (let ((machine (make-array 2)))
-      (read-sequence machine s)
-      (machine-print machine))
-    ;;; 该字节始终为1
-    (let ((ver (make-array 4)))
-      (read-sequence ver s)
-      (format t "Version: 0x~X~%" (bytes-to-num ver)))
-    ;;; 接下来的4/8个字节表示进程开始执行的内存位置
-    (entry-print s)
-    ;;; 接下来的4/8个字节表示程序头部表的起始位置
-    (phoff-print s)
-    ;;; 接下来的4/8个字节表示段头部表的起始位置
-    (shoff-print s)
-    ;;; flags的具体含义依赖于机器架构
-    (let ((flags (make-array 4)))
-      (read-sequence flags s)
-      (format t "Flags: 0x~X~%" (bytes-to-num flags)))
-    ;;; 该头部的体积大小，一般32位即为32字节而64位系统即为64字节
-    (let ((ehsize (make-array 2)))
-      (read-sequence ehsize s)
-      (format t "Size of this header: ~D (bytes)~%" (bytes-to-num ehsize)))
-    ;;; 该字节表示程序头部表入口的大小
-    (let ((phentsize (make-array 2)))
-      (read-sequence phentsize s)
-      (format t "Size of program headers: ~D (bytes)~%" (bytes-to-num phentsize)))
-    ;;; 程序头部表的数量
-    (let ((phnum (make-array 2)))
-      (read-sequence phnum s)
-      (format t "Number of program headers: ~D~%" (bytes-to-num phnum)))
-    ;;; 段头部表入口的体积
-    (let ((shentsize (make-array 2)))
-      (read-sequence shentsize s)
-      (format t "Size of section headers: ~D (bytes)~%" (bytes-to-num shentsize)))
-    (let ((shnum (make-array 2)))
-      (read-sequence shnum s)
-      (format t "Number of section headers: ~D~%" (bytes-to-num shnum)))
-    (let ((shstrndx (make-array 2)))
-      (read-sequence shstrndx s)
-      (format t "Section header string table index: ~D~%" (bytes-to-num shstrndx)))))
+  (let ((elf (elf-parse file)))
+    (elf-file-header-print elf)))
