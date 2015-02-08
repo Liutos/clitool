@@ -48,7 +48,7 @@
                  str)))
           (t bytes))))
 
-(defun tar-header-parse (s)
+(defun tar-header-parse-core (s)
   (let* ((name (read-bytes s 100 :stringp t))
          (mode (read-bytes s 8 :stringp t))
          (uid (read-bytes s 8 :stringp t :numberp t :radix 8))
@@ -68,27 +68,32 @@
     (setf (tar-checksum ins) checksum)
     (setf (tar-linkflag ins) linkflag)
     (setf (tar-linkname ins) linkname)
-    ;;; 将所有非header的内容读取干净，定位到下一个header上
-    ;;; 由于内容也是按照512字节为一个块安排的，因此需要先将当前位置向上对齐到512，再往前移动文件size的字节量，再向上对齐到512
-    (let* ((cur (file-position s))
-           (cur1 (* 512 (ceiling (/ cur 512))))
-           (pos1 (+ cur1 size))
-           (pos (* 512 (ceiling (/ pos1 512)))))
-      (file-position s pos))
     ;;; 返回构造好的对象
     ins))
+
+;;; 将所有非header的内容读取干净，定位到下一个header上;;; 由于内容也是按照512字节为一个块安排的，因此需要先将当前位置向上对齐到512，再往前移动文件size的字节量，再向上对齐到512
+(defun tar-header-parse (s)
+  (let* ((record (make-array 512))
+         (len (read-sequence record s)))
+    (when (or (< len 512)
+              (every #'zerop record))
+      (return-from tar-header-parse nil))
+    (with-input-from-sequence (rec record)
+      (let* ((ins (tar-header-parse-core rec))
+             (cur (file-position s))
+             (cur1 (* 512 (ceiling (/ cur 512))))
+             (pos1 (+ cur1 (tar-size ins)))
+             (pos (* 512 (ceiling (/ pos1 512)))))
+        (file-position s pos)
+        ins))))
 
 (defun tar-parse (file)
   "Read from tar file and generate an instance of class TAR."
   (with-open-file (s file :element-type '(unsigned-byte 8))
-    (let ((len (file-length s)))
-      (labels ((aux (tars)
-                 (let* ((pos (file-position s))
-                        (pos1 (* 10240 (ceiling pos 10240))))
-                   (if (< pos1 len)
-                       (aux (cons (tar-header-parse s) tars))
-                       (nreverse tars)))))
-        (aux '())))))
+    (loop
+       :for ins = (tar-header-parse s)
+       :while ins
+       :collect ins)))
 
 (defun perm-print (mode)
   (format t "-")
