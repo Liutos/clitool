@@ -12,5 +12,7 @@
 - wc/main.lisp. Simulate the Linux wc command.
 - readelf/main.lisp. Simulate the Linux readelf command.
 - tar/main.lisp. Simulate the Linux tar command.
+- getopt/main.lisp. Simulate the Linux getopt command.
+- uniq/main.lisp. Simulate the Linux uniq command.
 - bwt/main.lisp. Implementation of Burrows–Wheeler transform.
 - base64/main.lisp. Simulate the Linux base64 command.
