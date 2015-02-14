@@ -72,14 +72,78 @@
                   (base64-stream-encode2 str num) (loop-finish))
                  (t (base64-stream-encode3 str num))))))
 
+(defun base64-char2num (cs index)
+  (position (aref cs index) *base64-chars*))
+
+;;; 忽略最后两个字符的等号，将前两个字符转化为数字
+;;; 将数字右移四位，得到最终应当输出的一个字节
+(defun base64-stream-decode1 (cs out)
+  (let ((byte (ash (+ (ash (base64-char2num cs 0) 6)
+                      (base64-char2num cs 1))
+                   -4)))
+    (write-byte byte out)))
+
+;;; 处理方式类似于上一个函数，最终输出两个字节
+(defun base64-stream-decode2 (cs out)
+  (let* ((num (ash (+ (ash (base64-char2num cs 0) 12)
+                      (ash (base64-char2num cs 1) 6)
+                      (base64-char2num cs 2))
+                   -2))
+         byte2)
+    (setf byte2 (logand num (1- (ash 1 8))))
+    (setf num (ash num -8))
+    (write-byte num out)
+    (write-byte byte2 out)))
+
+;;; 最终输出三个字节
+(defun base64-stream-decode3 (cs out)
+  (let ((num (+ (ash (base64-char2num cs 0) 18)
+                (ash (base64-char2num cs 1) 12)
+                (ash (base64-char2num cs 2) 6)
+                (base64-char2num cs 3)))
+        (bytes '()))
+    (dotimes (i 3)
+      (push (logand num (1- (ash 1 8))) bytes)
+      (setf num (ash num -8)))
+    (dolist (byte bytes)
+      (write-byte byte out))))
+
+;;; base64-stream-decode: Stream -> Stream -> IO ()
+;;; 从输入字符流中持续读取四个一组的字符
+;;; 如果字符的最后两个字符为等号，说明解码后仅有一个字节，另行处理
+;;; 如果字符的最后一个字符为等号，说明解码后仅有两个字节，另行处理
+;;; 否则，表示可以解析出三个字节，按规则转换并输出到字节流中
+(defun base64-stream-decode (stream out)
+  (loop
+     :with cs = (make-array 4)
+     :for len = (read-sequence cs stream)
+     :until (= len 0)
+     :do (cond
+           ((and (char= #\= (aref cs 3)) (char= #\= (aref cs 2)))
+            (base64-stream-decode1 cs out))
+           ((char= #\= (aref cs 3))
+            (base64-stream-decode2 cs out))
+           (t (base64-stream-decode3 cs out)))))
+
 ;;; base64-encode: String|Pathname -> IO ()
 (defun base64-encode (file)
   (with-open-file (stream file :element-type '(unsigned-byte 8))
     (base64-stream-encode stream)))
 
+;;; base64-decode: String|Pathname -> String|Pathname -> IO ()
+(defun base64-decode (file output)
+  (with-open-file (stream file)
+    (with-open-file (out output
+                         :direction :output
+                         :element-type '(unsigned-byte 8)
+                         :if-does-not-exist :create
+                         :if-exists :supersede)
+      (base64-stream-decode stream out))))
+
 ;;; base64: String|Pathname -> IO ()
-(defun base64 (file &rest args &key (decode nil))
+(defun base64 (file &rest args &key (decode nil) (output "/dev/stdout"))
   "Base64 encode/decode data and print to standard output."
   (declare (ignorable args))
-  (when (not decode)
-    (base64-encode file)))
+  (if (not decode)
+      (base64-encode file)
+      (base64-decode file output)))
