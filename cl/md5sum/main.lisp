@@ -32,14 +32,54 @@
     #xf7537e82 #xbd3af235 #x2ad7d2bb #xeb86d391
     ))
 
+(defun read-align-last (bits)
+  (declare (ignorable bits))
+  (let ((byte (aref bits (1- (length bits)))))
+    (setf (aref bits (1- (length bits)))
+          (logior byte
+                  (lognot (1+ (lognot byte)))))))
+
+(defun num2bytes (num)
+  (let ((bytes (make-array 8)))
+    (dotimes (i 8 bytes)
+      (when (zerop num)
+        (return-from num2bytes bytes))
+      (setf (aref bytes (- 8 i 1))
+            (logand num (1- (ash 1 8))))
+      (setf num (ash num -8)))))
+
+(defun read-align-448 (bits)
+  (declare (ignorable bits))
+  (let* ((len (length bits))
+         (target (/ (+ (floor (* len 8) 512) 448) 8)))
+    (dotimes (i (- target len))
+      (vector-push-extend 0 bits))
+    (let ((bytes (num2bytes len)))
+      (dotimes (i 8)
+        (vector-push-extend (aref bytes i) bits)))))
+
 ;;; 计算流的长度，分配足够大的比特数组并将所有内容读入
 ;;; 在比特数组中添加一个比特1，之后持续追加比特0，直到长度len满足：存在正整数N，使得len = 512N + 448
+;;; 计算文件长度，换算成对应的比特数，从文件流中读取字节并填充到比特数组中
+;;; 如果最后一个字节是奇数，就需要新增一个#x80并填充剩余字节对齐到512N + 448
+;;; 如果最后一个字节是偶数，就需要追加一个比特1并填充剩余字节对齐到512N + 448
+;;; FIXME: 我怀疑我对这里的evenp成立时的处理方法有误解
 (defun read-align (stream)
-  ())
+  (let* ((len (file-length stream))
+         (bits (make-array len :element-type '(unsigned-byte 8) :fill-pointer 0)))
+    (dotimes (i len)
+      (let ((byte (read-byte stream nil)))
+        (vector-push byte bits)))
+    (if (evenp (aref bits (1- len)))
+        (read-align-last bits)
+        (vector-push-extend #x80 bits))
+    (read-align-448 bits)
+    bits))
 
 (defun md5sum-stream (stream)
   (declare (ignorable stream))
-  )
+  (let ((bits (read-align stream)))
+    bits))
 
 (defun md5sum (file)
   "Compute and check MD5 message digest."
