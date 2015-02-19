@@ -32,12 +32,10 @@
     #xf7537e82 #xbd3af235 #x2ad7d2bb #xeb86d391
     ))
 
-(defun read-align-last (bits)
-  (declare (ignorable bits))
-  (let ((byte (aref bits (1- (length bits)))))
-    (setf (aref bits (1- (length bits)))
-          (logior byte
-                  (lognot (1+ (lognot byte)))))))
+(defparameter *a0* #x67452301)
+(defparameter *b0* #xefcdab89)
+(defparameter *c0* #x98badcfe)
+(defparameter *d0* #x10325476)
 
 (defun num2bytes (num)
   (let ((bytes (make-array 8)))
@@ -50,11 +48,12 @@
 
 (defun read-align-448 (bits)
   (declare (ignorable bits))
+  (vector-push-extend #x80 bits)
   (let* ((len (length bits))
          (target (/ (+ (floor (* len 8) 512) 448) 8)))
     (dotimes (i (- target len))
       (vector-push-extend 0 bits))
-    (let ((bytes (num2bytes len)))
+    (let ((bytes (num2bytes (1- len))))
       (dotimes (i 8)
         (vector-push-extend (aref bytes i) bits)))))
 
@@ -70,16 +69,24 @@
     (dotimes (i len)
       (let ((byte (read-byte stream nil)))
         (vector-push byte bits)))
-    (if (evenp (aref bits (1- len)))
-        (read-align-last bits)
-        (vector-push-extend #x80 bits))
     (read-align-448 bits)
     bits))
+
+(defun main-loop (blk)
+  (declare (ignorable blk))
+  (let ((a *a0*) (b *b0*) (c *c0*) (d *d0*))
+    ))
 
 (defun md5sum-stream (stream)
   (declare (ignorable stream))
   (let ((bits (read-align stream)))
-    bits))
+    (flexi-streams:with-input-from-sequence (s bits)
+      (let ((blk (make-array (/ 512 8))))
+        (loop
+           :for len = (read-sequence blk s)
+           :do (main-loop blk)
+           :if (< len (/ 512 8))
+           :do (loop-finish))))))
 
 (defun md5sum (file)
   "Compute and check MD5 message digest."
