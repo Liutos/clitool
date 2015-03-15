@@ -6,6 +6,7 @@
 
 (in-package :liutos.cli.cp)
 
+;;; 粗略测试的结果是仍然要慢于原生的cp命令的复制速度
 ;;; cp: String|Pathname -> String|Pathname -> IO ()
 (defun cp (from to)
   "Copy files and directories."
@@ -14,8 +15,11 @@
                           :direction :output
                           :element-type '(unsigned-byte 8)
                           :if-does-not-exist :create
-                          :if-exists :overwrite)
-      (loop
-         :for byte = (read-byte src nil)
-         :while byte
-         :do (write-byte byte dest)))))
+                          :if-exists :supersede)
+      (let* ((size (* 4 1024))
+             (buf (make-array size :element-type '(unsigned-byte 8))))
+        (loop
+           :for len = (read-sequence buf src)
+           :do (write-sequence buf dest :end len)
+           :if (< len size)
+           :do (loop-finish))))))
