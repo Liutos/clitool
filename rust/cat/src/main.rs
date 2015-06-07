@@ -1,7 +1,10 @@
 use std::env;
+use std::error::Error;
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
+use std::io::Write;
+use std::io::stderr;
 
 fn main() {
     let mut args = env::args();
@@ -13,7 +16,9 @@ fn main() {
     let path = args.nth(1).unwrap();
     let input = File::open(&path);
     if let Err(msg) = input {
-        println!("{}: {}", path, msg);
+        let mut stderr = stderr();
+        let msg = msg.description().as_bytes();
+        stderr.write(msg).ok().expect("fail writing error");
         return;
     }
 
