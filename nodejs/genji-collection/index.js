@@ -6,8 +6,7 @@ const router = require('./worker/router');
 
 const co = require('co');
 
-co(function* () {
-  const uri = 'http://comic.kukudm.com/comiclist/2036/';
+function* start(uri) {
   const mod = router.dispatch(uri);
   const {
     img,
@@ -21,6 +20,11 @@ co(function* () {
       yield queue.push(uri, 'genji-task');
     }
   }
+}
+
+co(function* () {
+  const uri = 'http://comic.kukudm.com/comiclist/2036/';
+  yield start(uri);
 }).catch(function (err) {
   console.error(err);
 });
