@@ -1,5 +1,7 @@
 'use strict';
 
+const queue = require('./queue');
+
 const co = require('co');
 const iconv = require('iconv-lite');
 const request = require('co-request');
@@ -32,11 +34,12 @@ function* fetchAndParse(uri) {
 }
 
 co(function* () {
-  // const uri = 'http://comic.kukudm.com/comiclist/2036/43239/5.htm';
-  const uri = 'http://comic.kukudm.com/comiclist/2036/43239/100.htm';
+  const uri = 'http://comic.kukudm.com/comiclist/2036/43239/5.htm';
   const { img, next } = yield fetchAndParse(uri);
   console.log(img);
   console.log(next);
+  yield queue.push(img, 'genji-page');
+  yield queue.push(next, 'genji-task');
 }).catch(function (err) {
   console.error(err);
 });
