@@ -6,11 +6,13 @@ function parse(content) {
   const matched = content.match(nextPattern);
   let next = matched[matched.length - 1] || null;
   if (next) {
-    next = 'http://comic.kukudm.com/' + next;
+    next = {
+      entry: 'http://comic.kukudm.com/' + next
+    };
   }
   return {
     img,
-    next
+    next: [next]
   };
 }
 

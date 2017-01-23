@@ -10,7 +10,8 @@ const sleep = require('sleep');
 
 const TASK_QUEUE = 'genji-task';
 
-function* start(uri) {
+function* start(task) {
+  const uri = task.entry;
   const mod = router.dispatch(uri);
   if (mod) {
     console.log('Fetch and parse URI: ' + uri);
@@ -19,28 +20,27 @@ function* start(uri) {
       next
     } = yield router.invoke(mod, uri);
     if (img) {
-      yield queue.push(img, 'genji-page');
+      yield queue.push(JSON.stringify(_.extend({}, task, {
+        source: img
+      })), 'genji-page');
     }
-    if (typeof next === 'string') {
-      yield queue.push(next, TASK_QUEUE);
-    } else if (_.isArray(next)) {
-      for (const uri of next) {
-        yield queue.push(uri, TASK_QUEUE);
-      }
-      console.log(next.length + ' task created');
+    for (const n of next) {
+      yield queue.push(JSON.stringify(_.extend({}, task, n)), TASK_QUEUE);
     }
+    console.log(next.length + ' task created');
   }
 }
 
 co(function* () {
-  let uri;
+  let raw;
   do {
-    const uri = yield queue.pull(TASK_QUEUE);
-    if (uri) {
-      yield start(uri);
+    raw = yield queue.pull(TASK_QUEUE);
+    if (raw) {
+      const task = JSON.parse(raw);
+      yield start(task);
       sleep.sleep(1);
     }
-  } while (!uri);
+  } while (raw);
 }).catch(function (err) {
   console.error(err);
 });
