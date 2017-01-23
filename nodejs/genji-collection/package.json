@@ -12,6 +12,7 @@
     "cheerio": "^0.22.0",
     "co": "^4.6.0",
     "co-request": "^1.0.0",
-    "iconv-lite": "^0.4.15"
+    "iconv-lite": "^0.4.15",
+    "lodash": "^4.17.4"
   }
 }

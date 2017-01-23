@@ -4,6 +4,7 @@ const queue = require('./queue');
 
 const router = require('./worker/router');
 
+const _ = require('lodash');
 const co = require('co');
 
 const TASK_QUEUE = 'genji-task';
@@ -20,7 +21,7 @@ function* start(uri) {
     }
     if (typeof next === 'string') {
       yield queue.push(next, TASK_QUEUE);
-    } else if (typeof next === 'object') {
+    } else if (_.isArray(next)) {
       for (const uri of next) {
         yield queue.push(uri, TASK_QUEUE);
       }
