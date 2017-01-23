@@ -9,8 +9,10 @@ const request = require('co-request');
 function dispatch(uri) {
   if (uri === 'http://comic.kukudm.com/comiclist/2036/') {
     return comicDir;
-  } else {
+  } else if (uri.match(/2036\/.*\.htm$/)) {
     return comicPage;
+  } else {
+    return null;
   }
 }
 

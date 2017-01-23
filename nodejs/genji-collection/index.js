@@ -10,16 +10,20 @@ const TASK_QUEUE = 'genji-task';
 
 function* start(uri) {
   const mod = router.dispatch(uri);
-  const {
-    img,
-    next
-  } = yield router.invoke(mod, uri);
-  yield queue.push(img, 'genji-page');
-  if (typeof next === 'string') {
-    yield queue.push(next, TASK_QUEUE);
-  } else {
-    for (const uri of next) {
-      yield queue.push(uri, TASK_QUEUE);
+  if (mod) {
+    const {
+      img,
+      next
+    } = yield router.invoke(mod, uri);
+    if (img) {
+      yield queue.push(img, 'genji-page');
+    }
+    if (typeof next === 'string') {
+      yield queue.push(next, TASK_QUEUE);
+    } else if (typeof next === 'object') {
+      for (const uri of next) {
+        yield queue.push(uri, TASK_QUEUE);
+      }
     }
   }
 }
