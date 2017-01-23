@@ -6,12 +6,14 @@ const router = require('./worker/router');
 
 const _ = require('lodash');
 const co = require('co');
+const sleep = require('sleep');
 
 const TASK_QUEUE = 'genji-task';
 
 function* start(uri) {
   const mod = router.dispatch(uri);
   if (mod) {
+    console.log('Fetch and parse URI: ' + uri);
     const {
       img,
       next
@@ -25,17 +27,20 @@ function* start(uri) {
       for (const uri of next) {
         yield queue.push(uri, TASK_QUEUE);
       }
+      console.log(next.length + ' task created');
     }
   }
 }
 
 co(function* () {
-  const uri = yield queue.pull(TASK_QUEUE);
-  if (uri) {
-    yield start(uri);
-  } else {
-    console.info('Nothing to do');
-  }
+  let uri;
+  do {
+    const uri = yield queue.pull(TASK_QUEUE);
+    if (uri) {
+      yield start(uri);
+      sleep.sleep(1);
+    }
+  } while (!uri);
 }).catch(function (err) {
   console.error(err);
 });
