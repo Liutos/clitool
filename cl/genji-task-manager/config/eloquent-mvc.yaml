@@ -1,0 +1,9 @@
+application:
+  root: /home/liutos/src/clitool/cl/genji-task-manager/
+log:
+  directory: /home/liutos/src/clitool/cl/genji-task-manager/log/
+server:
+  port: 8086
+  server: hunchentoot
+static-file:
+  prefix: /assets/
