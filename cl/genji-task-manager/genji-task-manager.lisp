@@ -11,10 +11,16 @@
        (uri "uri"))
       request
     (redis:with-connection ()
-      (red:set uri (json:encode-json-to-string extras)))
-    (eloquent.mvc.response:respond
-     uri
-     :status 201)))
+      (let ((value (red:get uri)))
+        (if value
+            (eloquent.mvc.response:respond "" :status 204)
+            (progn
+              (let ((queue (cl-httpsqs:make-queue "127.0.0.1" 1219)))
+                (cl-httpsqs:enqueue uri "genji-task-test" queue))
+              (red:set uri (json:encode-json-to-string extras))
+              (eloquent.mvc.response:respond
+               uri
+               :status 201)))))))
 
 (defun retrive (request)
   "从Redis中查找KEY对应的附加数据"
