@@ -4,4 +4,5 @@
  eloquent.mvc.middleware:compress
  eloquent.mvc.middleware:static-file
  eloquent.mvc.middleware:parse-body
- eloquent.mvc.middleware:fill-template)
+ eloquent.mvc.middleware:fill-template
+ genji-task-manager:with-redis-connection)

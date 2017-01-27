@@ -1,5 +1,6 @@
 ;;;; package.lisp
 
 (defpackage #:genji-task-manager
-  (:use #:cl))
+  (:use #:cl)
+  (:export #:with-redis-connection))
 

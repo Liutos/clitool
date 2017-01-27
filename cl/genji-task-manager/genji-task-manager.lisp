@@ -10,28 +10,31 @@
       ((extras "extras")
        (uri "uri"))
       request
-    (redis:with-connection ()
-      (let ((value (red:get uri)))
-        (if value
-            (eloquent.mvc.response:respond "" :status 204)
-            (progn
-              (let ((data `(("extras" . ,extras)
-                            ("uri" . ,uri)))
-                    (queue (cl-httpsqs:make-queue "127.0.0.1" 1219)))
-                (cl-httpsqs:enqueue (json:encode-json-to-string data) "genji-task-test" queue))
-              (red:set uri (json:encode-json-to-string extras))
-              (eloquent.mvc.response:respond
-               uri
-               :status 201)))))))
+    (let ((value (red:get uri)))
+      (if value
+          (eloquent.mvc.response:respond "" :status 204)
+          (progn
+            (let ((data `(("extras" . ,extras)
+                          ("uri" . ,uri)))
+                  (queue (cl-httpsqs:make-queue "127.0.0.1" 1219)))
+              (cl-httpsqs:enqueue (json:encode-json-to-string data) "genji-task-test" queue))
+            (red:set uri (json:encode-json-to-string extras))
+            (eloquent.mvc.response:respond
+             uri
+             :status 201))))))
 
 (defun retrive (request)
   "从Redis中查找KEY对应的附加数据"
   (declare (ignorable request))
   (eloquent.mvc.controller:query-string-bind ((key "key"))
       request
-    (redis:with-connection ()
-      (let ((value (red:get key)))
-        (format t "~S~%" key)
-        (format t "~S~%" value)
-        (eloquent.mvc.response:respond
-         value)))))
+    (let ((value (red:get key)))
+      (format t "~S~%" key)
+      (format t "~S~%" value)
+      (eloquent.mvc.response:respond
+       value))))
+
+(defun with-redis-connection (request next &key)
+  "打开与Redis的连接"
+  (redis:with-connection ()
+    (funcall next request)))
