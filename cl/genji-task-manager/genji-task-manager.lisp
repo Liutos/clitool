@@ -15,8 +15,10 @@
         (if value
             (eloquent.mvc.response:respond "" :status 204)
             (progn
-              (let ((queue (cl-httpsqs:make-queue "127.0.0.1" 1219)))
-                (cl-httpsqs:enqueue uri "genji-task-test" queue))
+              (let ((data `(("extras" . ,extras)
+                            ("uri" . ,uri)))
+                    (queue (cl-httpsqs:make-queue "127.0.0.1" 1219)))
+                (cl-httpsqs:enqueue (json:encode-json-to-string data) "genji-task-test" queue))
               (red:set uri (json:encode-json-to-string extras))
               (eloquent.mvc.response:respond
                uri
