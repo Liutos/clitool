@@ -1,6 +1,7 @@
 'use strict';
 
 const queue = require('./queue');
+const taskManager = require('./task');
 
 const router = require('./worker/router');
 
@@ -25,7 +26,7 @@ function* start(task) {
       })), 'genji-page');
     }
     for (const n of next) {
-      yield queue.push(JSON.stringify(_.extend({}, task, n)), TASK_QUEUE);
+      yield taskManager.create(_.extend({}, task, n));
     }
     console.log(next.length + ' task created');
   }
@@ -41,6 +42,9 @@ co(function* () {
       sleep.sleep(1);
     }
   } while (raw);
+  // yield start({
+  //   entry: 'http://comic.kukudm.com/comiclist/2036/'
+  // });
 }).catch(function (err) {
   console.error(err);
 });
