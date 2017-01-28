@@ -14,14 +14,27 @@
       (if value
           (eloquent.mvc.response:respond "" :status 204)
           (progn
-            (let ((data `(("extras" . ,extras)
-                          ("uri" . ,uri)))
+            (let ((data (append extras (list (cons "entry" uri))))
                   (queue (cl-httpsqs:make-queue "127.0.0.1" 1219)))
-              (cl-httpsqs:enqueue (json:encode-json-to-string data) "genji-task-test" queue))
+              (cl-httpsqs:enqueue (json:encode-json-to-string data) "genji-task" queue))
             (red:set uri (json:encode-json-to-string extras))
             (eloquent.mvc.response:respond
              uri
              :status 201))))))
+
+(defun restore (request)
+  "将一条已经处理的任务重新推入队列中"
+  (eloquent.mvc.controller:json-body-bind ((uri "uri"))
+      request
+    (let ((value (red:get uri)))
+      (if value
+          (progn
+            (let ((queue (cl-httpsqs:make-queue "127.0.0.1" 1219)))
+              (cl-httpsqs:enqueue value "genji-task" queue))
+            (eloquent.mvc.response:respond
+             uri
+             :status 201))
+          (eloquent.mvc.response:respond "" :status 204)))))
 
 (defun retrive (request)
   "从Redis中查找KEY对应的附加数据"
