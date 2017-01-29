@@ -1,0 +1,17 @@
+{
+  "name": "genji-downloader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "co": "^4.6.0",
+    "co-request": "^1.0.0",
+    "mkdirp": "^0.5.1",
+    "sleep": "^5.1.0"
+  }
+}
