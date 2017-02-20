@@ -2,6 +2,8 @@ application:
   root: /home/liutos/src/clitool/cl/genji-task-manager/
 log:
   directory: /home/liutos/src/clitool/cl/genji-task-manager/log/
+genji-task-manager:
+  redis-port: 6380
 server:
   port: 8086
   server: hunchentoot

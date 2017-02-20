@@ -47,7 +47,8 @@
       (eloquent.mvc.response:respond
        value))))
 
-(defun with-redis-connection (request next &key)
+(defun with-redis-connection (request next &key config)
   "打开与Redis的连接"
-  (redis:with-connection ()
-    (funcall next request)))
+  (let ((port (eloquent.mvc.config:get config "genji-task-manager" "redis-port")))
+    (redis:with-connection (:port port)
+      (funcall next request))))
