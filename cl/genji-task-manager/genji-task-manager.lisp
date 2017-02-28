@@ -10,6 +10,16 @@
       ((extras "extras")
        (uri "uri"))
       request
+    (unless extras
+      (return-from create
+        (eloquent.mvc.response:respond
+         "缺少`extras`参数"
+         :status 400)))
+    (unless uri
+      (return-from create
+        (eloquent.mvc.response:respond
+         "缺少`uri`参数"
+         :status 400)))
     (let ((value (red:get uri)))
       (if value
           (eloquent.mvc.response:respond "" :status 204)
