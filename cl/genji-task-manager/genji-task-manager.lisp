@@ -7,19 +7,9 @@
 (defun create (request)
   "往Redis中记录本次单条爬虫任务的提交情况"
   (eloquent.mvc.controller:json-body-bind
-      ((extras "extras")
-       (uri "uri"))
+      ((extras "extras" :requirep t)
+       (uri "uri" :requirep t))
       request
-    (unless extras
-      (return-from create
-        (eloquent.mvc.response:respond
-         "缺少`extras`参数"
-         :status 400)))
-    (unless uri
-      (return-from create
-        (eloquent.mvc.response:respond
-         "缺少`uri`参数"
-         :status 400)))
     (let ((value (red:get uri)))
       (if value
           (eloquent.mvc.response:respond "" :status 204)
