@@ -3,5 +3,6 @@
   :author "Liutos <mat.liutos@gmail.com>"
   :depends-on (:ip-interfaces
                :split-sequence)
-  :components ((:file "misc")))
+  :components ((:file "get-private-ip")
+               (:file "misc")))
 
