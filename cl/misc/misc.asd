@@ -2,7 +2,12 @@
   :version "0.0.1"
   :author "Liutos <mat.liutos@gmail.com>"
   :depends-on (:ip-interfaces
+               :local-time
                :split-sequence)
-  :components ((:file "get-private-ip")
-               (:file "misc")))
+  :serial t
+  :components ((:file "package")
+               (:file "get-private-ip")
+               (:file "misc")
+               (:file "now")
+               (:file "snowflake")))
 

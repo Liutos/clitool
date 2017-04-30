@@ -3,4 +3,6 @@
 (defpackage #:liutos.cli.misc
   (:use #:cl)
   (:export #:get-private-ip
-           #:is-private-ip-p))
+           #:is-private-ip-p
+           #:now
+           #:snowflake))
