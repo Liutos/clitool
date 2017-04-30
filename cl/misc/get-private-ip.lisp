@@ -25,6 +25,14 @@
             ("172.16.0.0" "172.31.255.255")
             ("192.168.0.0" "192.168.255.255"))))
 
+(defun get-private-ip ()
+  "Return the first private IP address selected from interfaces list of this machine. Return NIL if no private IP address can be found."
+  (let ((interfaces (ip-interfaces:get-ip-interfaces)))
+    (let ((interface (find-if #'is-private-ip-p
+                              interfaces
+                              :key #'ip-interfaces:ip-interface-address)))
+      (ip-interfaces:ip-interface-address interface))))
+
 (defgeneric is-private-ip-p (ip-address))
 
 (defmethod is-private-ip-p ((ip-address integer))
