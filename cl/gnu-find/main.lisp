@@ -42,7 +42,13 @@
     (symbol (string-downcase (symbol-name test)))))
 
 (defun gnu-find (starting-point &rest expressions)
-  (declare (ignorable expressions))
+  "Return file names matching EXPRESSIONS in STARTING-POINT hierarchy.
+
+STARTING-POINT is a string designating the directory tree root to search.
+
+EXPRESSIONS is a list containing test statements and logical operators. Each test statement is a list containing two elements. The first element is a string or a symbol designating a test described in man page of find(1), and the second one is an integer or a string designating the argument of this test. Logical operators include AND, OR are also available.
+
+This function uses a command line utility find(1) for performing underlying search."
   (check-type starting-point string)
   (let* ((command (format nil "find ~A~A" starting-point (stringify-expressions expressions)))
          (files (with-output-to-string (*standard-output*)
