@@ -42,7 +42,7 @@
     (symbol (string-downcase (symbol-name test)))))
 
 (defun gnu-find (starting-point &rest expressions)
-  "Return file names matching EXPRESSIONS in STARTING-POINT hierarchy.
+  "Return file names matching EXPRESSIONS in STARTING-POINT hierarchy. The second returned value is the command invoked.
 
 STARTING-POINT is a string designating the directory tree root to search.
 
@@ -57,4 +57,4 @@ This function uses a command line utility find(1) for performing underlying sear
          (files (remove-if #'(lambda (s)
                                (string= s ""))
                            files)))
-    files))
+    (values files command)))
