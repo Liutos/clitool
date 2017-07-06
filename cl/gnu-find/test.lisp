@@ -14,6 +14,7 @@
 (prove:is (gnu-find::stringify-expression '(name "*lisp")) " -name \"*lisp\"")
 
 (prove:is (gnu-find::stringify-and-expressions '((links 1) (name "*lisp"))) " -links 1 -a -name \"*lisp\"")
+(prove:is (gnu-find::stringify-not-expressions '((name "*lisp"))) " -not -name \"*lisp\"")
 (prove:is (gnu-find::stringify-or-expressions '((links 1) (name "*lisp"))) " -links 1 -o -name \"*lisp\"")
 
 (prove:is (gnu-find::stringify-expressions '((links 1))) " -links 1")

@@ -8,6 +8,7 @@
   (check-type expressions list)
   (let ((delimiter (ecase operator
                      (and " -a")
+                     (not " -not")
                      (or " -o"))))
     (with-output-to-string (s)
       (loop
@@ -32,8 +33,16 @@
       (let ((operator (first expression)))
         (case operator
           (and (format s "~A" (stringify-and-expressions (rest expression))))
+          (not (format s "~A" (stringify-not-expressions (rest expression))))
           (or (format s "~A" (stringify-or-expressions (rest expression))))
           (t (format s "~A" (stringify-expression expression))))))))
+
+(defun stringify-not-expressions (expressions)
+  (check-type expressions list)
+  (with-output-to-string (s)
+    (dolist (expression expressions)
+      (princ " -not" s)
+      (princ (stringify-expression expression) s))))
 
 (defun stringify-test (test)
   (check-type test (or string symbol))
