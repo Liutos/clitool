@@ -13,10 +13,9 @@
     (with-output-to-string (s)
       (loop
          :for exprs :on expressions
-         :do (progn
-               (format s "~A" (stringify-expression (first exprs)))
-               (when (rest exprs)
-                 (princ delimiter s)))))))
+         :do (format s "~A" (stringify-expression (first exprs)))
+         :when (rest exprs)
+         :do (princ delimiter s)))))
 
 (defun stringify-or-expressions (expressions)
   (stringify-binary-operator-expressions 'or expressions))
