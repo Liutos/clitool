@@ -1,24 +1,24 @@
 (in-package #:gnu-find)
 
 (defun stringify-and-expressions (expressions)
-  (check-type expressions cons)
-  (with-output-to-string (s)
-    (loop
-       :for exprs :on expressions
-       :do (progn
-             (format s "~A" (stringify-expression (first exprs)))
-             (when (rest exprs)
-               (format s " -a"))))))
+  (stringify-binary-operator-expressions 'and expressions))
+
+(defun stringify-binary-operator-expressions (operator expressions)
+  (check-type operator symbol)
+  (check-type expressions list)
+  (let ((delimiter (ecase operator
+                     (and " -a")
+                     (or " -o"))))
+    (with-output-to-string (s)
+      (loop
+         :for exprs :on expressions
+         :do (progn
+               (format s "~A" (stringify-expression (first exprs)))
+               (when (rest exprs)
+                 (princ delimiter s)))))))
 
 (defun stringify-or-expressions (expressions)
-  (check-type expressions cons)
-  (with-output-to-string (s)
-    (loop
-       :for exprs :on expressions
-       :do (progn
-             (format s "~A" (stringify-expression (first exprs)))
-             (when (rest exprs)
-               (format s " -o"))))))
+  (stringify-binary-operator-expressions 'or expressions))
 
 (defun stringify-expression (expression)
   (check-type expression list)
