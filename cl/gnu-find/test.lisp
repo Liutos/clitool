@@ -5,7 +5,7 @@
 
 (in-package #:gnu-find-test)
 
-(prove:plan 9)
+(prove:plan 10)
 
 (prove:is (gnu-find::stringify-test "newerXY") "newerXY")
 (prove:is (gnu-find::stringify-test 'links) "links")
