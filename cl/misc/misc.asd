@@ -8,7 +8,9 @@
   :serial t
   :components ((:file "package")
                (:file "get-private-ip")
+               (:file "get-system-uptime")
                (:file "misc")
                (:file "now")
-               (:file "snowflake")))
+               (:file "snowflake")
+               (:file "uuid-short")))
 
