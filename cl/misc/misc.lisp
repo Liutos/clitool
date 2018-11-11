@@ -50,3 +50,19 @@
     (let ((ns (reverse (cf-decode n d))))
       (dolist (n ns)
         (write-byte n s)))))
+
+(defmacro my-defun (name lambda-list &body body)
+  "CL:DEFUN的变体，支持从内部直接用关键字RET返回到函数调用处
+
+一个例子如下
+```lisp
+(my-defun foobaz ()
+  (+ 1 1)
+  (ret (+ 2 3))
+  (+ 5 8))
+```"
+  (defmacro defun-with-ret (name lambda-list &body body)
+  `(defun ,name ,lambda-list
+     (macrolet ((ret (&optional value)
+                  `(return-from ,',name ,value)))
+       ,@body))))
