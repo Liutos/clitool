@@ -6,8 +6,7 @@
 
 (in-package #:com.liutos.sak)
 
-(defmacro vertical-let (&body body)
-  "不需要不停缩进的LET"
+(defun vertical-let/aux (op body)
   (let ((stack '()))
     ;; 处理BODY中的所有元素将它们归类为binding和form塞入STACK中
     (let ((lst body))
@@ -33,12 +32,20 @@
                 (t
                  (when (eq last-type :binding)
                    (setf forms
-                         `((let ,bindings ,@forms)))
+                         `((,op ,bindings ,@forms)))
                    (setf bindings '()))
                  (push (cdr e) forms)
                  (setf last-type :form)))))
-      `(let ,bindings
+      `(,op ,bindings
          ,@forms))))
+
+(defmacro vertical-let (&body body)
+  "不需要不停缩进的LET"
+  (vertical-let/aux 'let body))
+
+(defmacro vertical-let* (&body body)
+  "不需要不停缩进的LET*"
+  (vertical-let/aux 'let* body))
 
 (defmacro while (test &body body)
   "C语言风格的while循环"
