@@ -52,3 +52,23 @@
   `(loop
       :while ,test
       :do (progn ,@body)))
+
+(defun floyd-sample (m n)
+  "Floyd抽样算法
+
+算法参考自这篇[文章](http://book.51cto.com/art/201104/258180.htm)"
+  (check-type m integer)
+  (check-type n integer)
+  (let (result
+        (s (make-hash-table)))
+    (loop
+       :for j :from (1+ (- n m)) :to n
+       :do (let ((rn (1+ (random j))))
+             (if (gethash rn s)
+                 (setf (gethash j s) t)
+                 (setf (gethash rn s) t))))
+    (maphash #'(lambda (k v)
+                 (declare (ignorable v))
+                 (push k result))
+             s)
+    result))
