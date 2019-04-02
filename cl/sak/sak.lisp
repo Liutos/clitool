@@ -6,6 +6,8 @@
 
 (in-package #:com.liutos.sak)
 
+(defparameter *memo* (make-hash-table))
+
 (defun vertical-let/aux (op body)
   (let ((stack '()))
     ;; 处理BODY中的所有元素将它们归类为binding和form塞入STACK中
@@ -72,3 +74,25 @@
                  (push k result))
              s)
     result))
+
+(defun memoize (f biz)
+  ;; 确保BIZ对应的作为缓存的哈希表存在
+  (multiple-value-bind (val foundp)
+      (gethash biz *memo*)
+    (declare (ignorable val))
+    (when (not foundp)
+      (setf (gethash biz *memo*)
+            (make-hash-table :test 'equal))))
+
+  (let ((name (gensym)))
+    (lambda (&rest args)
+      (catch name
+        (let ((cache (gethash biz *memo*)))
+          (multiple-value-bind (val foundp)
+              (gethash args cache)
+            (when foundp
+              (throw name val)))
+
+          (let ((val (apply f args)))
+            (setf (gethash args cache) val)
+            val))))))
