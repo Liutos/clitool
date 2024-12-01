@@ -1,0 +1,40 @@
+(in-package :cl-user)
+
+(defpackage :cl-accounting.entity
+  (:use :cl)
+  (:export #:<account>
+           #:create-account
+           #:get-account
+           #:get-by-name))
+
+(in-package :cl-accounting.entity)
+
+(defclass <account> ()
+  ((created-at)
+   (balance
+    :initarg :balance)
+   (id
+    :initarg :id)
+   (name
+    :initarg :name)
+   (parent-id
+    :initarg :parent-id)
+   (updated-at))
+  (:documentation "账户"))
+
+(defmethod print-object ((object <account>) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (with-slots (balance id name parent-id)
+        object
+      (format stream "balance: ~A; id: ~A; name: ~A; parent-id: ~A"
+              balance id name parent-id))))
+
+;;; 定义账户的 repo 接口。
+(defgeneric create-account (repo name parent-id)
+  (:documentation "创建一个账户。"))
+
+(defgeneric get-account (repo id)
+  (:documentation "基于 ID 获取账户。"))
+
+(defgeneric get-by-name (repo name)
+  (:documentation "基于名称来查找账户。"))
