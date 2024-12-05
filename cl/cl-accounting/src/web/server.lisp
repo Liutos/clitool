@@ -2,9 +2,22 @@
 
 (defvar *acceptor* nil)
 
+(defun handle-business-error (func)
+  "捕获调用函数 func 时抛出的 <business-error> 异常，并将其转换为 JSON 格式的返回。"
+  (handler-case
+      (funcall func)
+    (cl-accounting.app:<business-error> (c)
+      (setf (hunchentoot:content-type*) "Content-Type: application/json")
+      (let ((result (list
+                     "msg" (cl-accounting.app:msg-of c)
+                     "status" 1)))
+        (with-output-to-string (*standard-output*)
+          (yason:encode (alexandria:plist-hash-table result) *standard-output*))))))
+
 (defun install-routes ()
   "注册路由规则。"
-  (push (hunchentoot:create-prefix-dispatcher "/api/account/create" #'create-account)
+  (push (hunchentoot:create-prefix-dispatcher "/api/account/create" (lambda ()
+                                                                      (handle-business-error #'create-account)))
         hunchentoot:*dispatch-table*))
 
 (defun init ()

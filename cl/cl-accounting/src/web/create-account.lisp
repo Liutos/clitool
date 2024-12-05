@@ -17,19 +17,9 @@
                           :parent-id parent-id)))
     ;; TODO: 将这里的 with-output-to-string 的用法改为一个装饰器或中间件。
     (with-output-to-string (*standard-output*)
-      ;; TODO: 将这里捕捉异常的代码剥离为装饰器或中间件。
-      (handler-case
-          (progn
-            (cl-accounting.app:run-handler handler)
-            (setf (hunchentoot:content-type*) "Content-Type: application/json")
-            (let ((result (list
-                           "msg" "success"
-                           "status" 0)))        ; 类似于 UNIX 的惯例，0 表示【没有异常】。
-              (yason:encode (alexandria:plist-hash-table result) *standard-output*)))
-
-        (cl-accounting.app:<business-error> (c)
-          (setf (hunchentoot:content-type*) "Content-Type: application/json")
-          (let ((result (list
-                         "msg" (cl-accounting.app:msg-of c)
-                         "status" 1)))
-            (yason:encode (alexandria:plist-hash-table result) *standard-output*)))))))
+      (cl-accounting.app:run-handler handler)
+      (setf (hunchentoot:content-type*) "Content-Type: application/json")
+      (let ((result (list
+                     "msg" "success"
+                     "status" 0))) ; 类似于 UNIX 的惯例，0 表示【没有异常】。
+        (yason:encode (alexandria:plist-hash-table result) *standard-output*)))))
