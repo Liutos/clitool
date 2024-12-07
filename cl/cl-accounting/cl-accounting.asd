@@ -14,6 +14,8 @@
                                             :depends-on ("package"))
                                      (:file "create-account"
                                       :depends-on ("condition" "package"))
+                                     (:file "delete-account"
+                                            :depends-on ("condition" "package"))
                                      (:file "package"))
                         :depends-on ("entity"))
                (:module "entity"
@@ -30,6 +32,8 @@
                         :depends-on ("entity"))
                (:module "web"
                         :components ((:file "create-account"
+                                            :depends-on ("package"))
+                                     (:file "delete-account"
                                             :depends-on ("package"))
                                      (:file "package")
                                      (:file "server"

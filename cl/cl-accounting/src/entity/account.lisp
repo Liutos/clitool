@@ -4,8 +4,10 @@
   (:use :cl)
   (:export #:<account>
            #:create-account
+           #:delete-account
            #:get-account
-           #:get-by-name))
+           #:get-by-name
+           #:list-by-parent-id))
 
 (in-package :cl-accounting.entity)
 
@@ -33,8 +35,14 @@
 (defgeneric create-account (repo name parent-id)
   (:documentation "创建一个账户。"))
 
+(defgeneric delete-account (repo id)
+  (:documentation "删除指定的账户。"))
+
 (defgeneric get-account (repo id)
   (:documentation "基于 ID 获取账户。"))
 
 (defgeneric get-by-name (repo name)
   (:documentation "基于名称来查找账户。"))
+
+(defgeneric list-by-parent-id (repo parent-id)
+  (:documentation "查询指定的 parent_id 的账户。"))

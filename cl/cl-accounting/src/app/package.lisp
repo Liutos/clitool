@@ -4,6 +4,7 @@
   (:use #:cl)
   (:export #:<business-error>
            #:<create-account-handler>
+           #:<delete-account-handler>
            #:msg-of
            #:run-handler))
 

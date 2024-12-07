@@ -9,5 +9,6 @@
 (in-package :cl-accounting)
 
 (defun main ()
+  (cl-accounting.infra:init)
   (cl-accounting.web:init)
   (cl-accounting.web:start))

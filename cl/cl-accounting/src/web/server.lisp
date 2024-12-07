@@ -16,9 +16,15 @@
 
 (defun install-routes ()
   "注册路由规则。"
-  (push (hunchentoot:create-prefix-dispatcher "/api/account/create" (lambda ()
-                                                                      (handle-business-error #'create-account)))
-        hunchentoot:*dispatch-table*))
+  (let ((path-handlers
+          (list (list "/api/account/create" #'create-account)
+                (list "/api/account/delete" #'delete-account))))
+    (dolist (info path-handlers)
+      (let ((path (first info))
+            (handler (second info)))
+        (push (hunchentoot:create-prefix-dispatcher path (lambda ()
+                                                           (handle-business-error handler)))
+              hunchentoot:*dispatch-table*)))))
 
 (defun init ()
   "初始化一个 WEB 服务器接收请求。"
