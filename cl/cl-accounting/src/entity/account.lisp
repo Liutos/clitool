@@ -1,14 +1,3 @@
-(in-package :cl-user)
-
-(defpackage :cl-accounting.entity
-  (:use :cl)
-  (:export #:<account>
-           #:create-account
-           #:delete-account
-           #:get-account
-           #:get-by-name
-           #:list-by-parent-id))
-
 (in-package :cl-accounting.entity)
 
 (defclass <account> ()

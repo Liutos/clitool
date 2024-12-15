@@ -18,7 +18,8 @@
   "注册路由规则。"
   (let ((path-handlers
           (list (list "/api/account/create" #'create-account)
-                (list "/api/account/delete" #'delete-account))))
+                (list "/api/account/delete" #'delete-account)
+                (list "/api/transfer/create" #'create-transfer))))
     (dolist (info path-handlers)
       (let ((path (first info))
             (handler (second info)))

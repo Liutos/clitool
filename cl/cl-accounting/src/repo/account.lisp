@@ -1,10 +1,3 @@
-(in-package cl-user)
-
-(defpackage :cl-accounting.repo
-  (:use :cl
-        #:cl-accounting.entity)
-  (:export #:new-mysql-account-repo))
-
 (in-package :cl-accounting.repo)
 
 (defclass <mysql-account-repo> ()

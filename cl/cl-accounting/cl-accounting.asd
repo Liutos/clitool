@@ -14,12 +14,17 @@
                                             :depends-on ("package"))
                                      (:file "create-account"
                                       :depends-on ("condition" "package"))
+                                     (:file "create-transfer"
+                                            :depends-on ("package"))
                                      (:file "delete-account"
                                             :depends-on ("condition" "package"))
                                      (:file "package"))
                         :depends-on ("entity"))
                (:module "entity"
-                        :components ((:file "account")))
+                        :components ((:file "package")
+                                     (:file "account")
+                                     (:file "transfer"))
+                        :serial t)
                (:module "infra"
                         :components ((:file "connection")))
                (:file "main"
@@ -28,8 +33,11 @@
                              "repo"
                              "web"))
                (:module "repo"
-                        :components ((:file "account"))
-                        :depends-on ("entity"))
+                        :components ((:file "package")
+                                     (:file "account")
+                                     (:file "transfer"))
+                        :depends-on ("entity")
+                        :serial t)
                (:module "web"
                         :components ((:file "create-account"
                                             :depends-on ("package"))
@@ -37,5 +45,7 @@
                                             :depends-on ("package"))
                                      (:file "package")
                                      (:file "server"
+                                            :depends-on ("package"))
+                                     (:file "create-transfer"
                                             :depends-on ("package")))
                         :depends-on ("app" "infra"))))
