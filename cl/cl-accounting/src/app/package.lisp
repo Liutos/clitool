@@ -6,9 +6,12 @@
            #:<create-account-handler>
            #:<create-transfer-handler>
            #:<delete-account-handler>
+           #:begin-transaction
+           #:commit-transaction
            #:get-account-repo
            #:get-transfer-repo
            #:msg-of
+           #:rollback-transaction
            #:run-handler))
 
 (in-package #:cl-accounting.app)

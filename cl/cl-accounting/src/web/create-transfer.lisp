@@ -17,10 +17,10 @@
                           :to-account-id to-account-id
                           :uow (cl-accounting.repo:new-mysql-unit-of-work connection))))
     ;; TODO: 将这里的 with-output-to-string 的用法改为一个装饰器或中间件。
-    (with-output-to-string (*standard-output*)
+    (with-output-to-string (s)
       (cl-accounting.app:run-handler handler)
       (setf (hunchentoot:content-type*) "Content-Type: application/json")
       (let ((result (list
                      "msg" "success"
                      "status" 0))) ; 类似于 UNIX 的惯例，0 表示【没有异常】。
-        (yason:encode (alexandria:plist-hash-table result) *standard-output*)))))
+        (yason:encode (alexandria:plist-hash-table result) s)))))

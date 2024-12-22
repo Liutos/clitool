@@ -23,18 +23,25 @@
     ;; 校验 ID 有效性。
     (let ((account-repo (get-account-repo uow))
           (transfer-repo (get-transfer-repo uow)))
-      (let ((from-account
-              (cl-accounting.entity:get-account account-repo from-account-id))
-            (to-account
-              (cl-accounting.entity:get-account account-repo to-account-id)))
-        (unless from-account
-          (error '<business-error> :msg (format nil "找不到 ID 为 ~D 的账户" from-account-id)))
+      (begin-transaction uow)
+      (handler-case
+          (let ((from-account
+                  (cl-accounting.entity:get-account account-repo from-account-id))
+                (to-account
+                  (cl-accounting.entity:get-account account-repo to-account-id)))
+            (unless from-account
+              (error '<business-error> :msg (format nil "找不到 ID 为 ~D 的账户" from-account-id)))
 
-        (unless to-account
-          (error '<business-error> :msg (format nil "找不到 ID 为 ~D 的账户" to-account-id)))
+            (unless to-account
+              (error '<business-error> :msg (format nil "找不到 ID 为 ~D 的账户" to-account-id)))
 
-        (cl-accounting.entity:create-transfer
-         transfer-repo
-         amount
-         from-account-id
-         to-account-id)))))
+            (cl-accounting.entity:create-transfer
+             transfer-repo
+             amount
+             from-account-id
+             to-account-id)
+            (commit-transaction uow))
+        (t (var)
+          ;; 回滚数据库事务，并继续往上抛出异常。
+          (rollback-transaction uow)
+          (error var))))))
