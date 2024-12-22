@@ -18,7 +18,9 @@
                                             :depends-on ("package"))
                                      (:file "delete-account"
                                             :depends-on ("condition" "package"))
-                                     (:file "package"))
+                                     (:file "package")
+                                     (:file "unit-of-work"
+                                            :depends-on ("package")))
                         :depends-on ("entity"))
                (:module "entity"
                         :components ((:file "package")
@@ -35,8 +37,9 @@
                (:module "repo"
                         :components ((:file "package")
                                      (:file "account")
-                                     (:file "transfer"))
-                        :depends-on ("entity")
+                                     (:file "transfer")
+                                     (:file "unit-of-work"))
+                        :depends-on ("app" "entity")
                         :serial t)
                (:module "web"
                         :components ((:file "create-account"

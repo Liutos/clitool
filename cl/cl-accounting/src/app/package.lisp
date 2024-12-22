@@ -6,6 +6,8 @@
            #:<create-account-handler>
            #:<create-transfer-handler>
            #:<delete-account-handler>
+           #:get-account-repo
+           #:get-transfer-repo
            #:msg-of
            #:run-handler))
 
