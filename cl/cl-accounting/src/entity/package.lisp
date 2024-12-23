@@ -9,4 +9,5 @@
            #:delete-account
            #:get-account
            #:get-by-name
-           #:list-by-parent-id))
+           #:list-by-parent-id
+           #:lock-account-by-id))

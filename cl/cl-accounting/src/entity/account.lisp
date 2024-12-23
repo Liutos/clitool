@@ -35,3 +35,6 @@
 
 (defgeneric list-by-parent-id (repo parent-id)
   (:documentation "查询指定的 parent_id 的账户。"))
+
+(defgeneric lock-account-by-id (repo id)
+  (:documentation "用主键锁定一行账户记录。"))

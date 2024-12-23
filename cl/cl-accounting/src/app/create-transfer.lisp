@@ -23,12 +23,13 @@
     ;; 校验 ID 有效性。
     (let ((account-repo (get-account-repo uow))
           (transfer-repo (get-transfer-repo uow)))
+      ;; TODO: 将 begin-transaction/handler-case 等用法封装为一个高阶函数或者宏。
       (begin-transaction uow)
       (handler-case
           (let ((from-account
-                  (cl-accounting.entity:get-account account-repo from-account-id))
+                  (cl-accounting.entity:lock-account-by-id account-repo from-account-id))
                 (to-account
-                  (cl-accounting.entity:get-account account-repo to-account-id)))
+                  (cl-accounting.entity:lock-account-by-id account-repo to-account-id)))
             (unless from-account
               (error '<business-error> :msg (format nil "找不到 ID 为 ~D 的账户" from-account-id)))
 

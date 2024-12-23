@@ -34,13 +34,17 @@
 (defmethod get-by-name ((repo <mysql-account-repo>) name)
   (get-by-unique-key repo "name" name))
 
-(defun get-by-unique-key (repo key value)
+(defun get-by-unique-key (repo key value
+                          &key for-update)
   "基于一个唯一键来查询账户。"
   (with-slots (connection)
       repo
-    (let* ((prepared-statement
-             (dbi:prepare connection
-                          (format nil "SELECT * FROM `t_account` WHERE `~A` = ?" key)))
+    (let* ((sql
+             (let ((sql (format nil "SELECT * FROM `t_account` WHERE `~A` = ?" key)))
+               (when for-update
+                 (setf sql (format nil "~A FOR UPDATE" sql)))))
+           (prepared-statement
+             (dbi:prepare connection sql))
            (query (dbi:execute prepared-statement (list value)))
            (rows (dbi:fetch-all query)))
       (if rows
@@ -57,6 +61,9 @@
            (query (dbi:execute prepared-statement (list parent-id)))
            (rows (dbi:fetch-all query)))
       (mapcar #'convert-row-to-account rows))))
+
+(defmethod lock-account-by-id ((repo <mysql-account-repo>) id)
+  (get-by-unique-key repo "id" id :for-update t))
 
 (defun new-mysql-account-repo (connection)
   (make-instance '<mysql-account-repo>
