@@ -7,7 +7,8 @@
    (id
     :initarg :id)
    (name
-    :initarg :name)
+    :initarg :name
+    :reader account-name)
    (parent-id
     :initarg :parent-id)
    (updated-at))

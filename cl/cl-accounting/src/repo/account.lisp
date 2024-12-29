@@ -42,7 +42,9 @@
     (let* ((sql
              (let ((sql (format nil "SELECT * FROM `t_account` WHERE `~A` = ?" key)))
                (when for-update
-                 (setf sql (format nil "~A FOR UPDATE" sql)))))
+                 (setf sql (format nil "~A FOR UPDATE" sql)))
+
+               sql))
            (prepared-statement
              (dbi:prepare connection sql))
            (query (dbi:execute prepared-statement (list value)))

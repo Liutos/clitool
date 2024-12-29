@@ -39,20 +39,40 @@
           type: 'page',
           title: '表单页面',
           body: {
-            type: 'form',
-            mode: 'horizontal',
-            api: '/saveForm',
-            body: [
+            type: 'crud',
+            api: '/api/transfer/list',
+            syncLocation: false,
+            columns: [
               {
-                label: 'Name',
-                type: 'input-text',
-                name: 'name'
+                label: 'id',
+                type: 'static',
+                name: 'id'
               },
               {
-                label: 'Email',
-                type: 'input-email',
-                name: 'email'
-              }
+                label: '金额',
+                type: 'static',
+                name: 'amount'
+              },
+              {
+                label: '备注',
+                type: 'static',
+                name: 'comment'
+              },
+              {
+                label: '流出账户',
+                type: 'static',
+                name: 'from_account_name'
+              },
+              {
+                label: '流入账户',
+                type: 'static',
+                name: 'to_account_name'
+              },
+              {
+                label: '时间',
+                type: 'static',
+                name: 'created_at'
+              },
             ]
           }
         };

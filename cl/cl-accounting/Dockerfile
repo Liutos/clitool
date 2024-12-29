@@ -9,7 +9,7 @@ RUN sed -i s@/deb.debian.org/@/mirrors.aliyun.com/@g /etc/apt/sources.list \
   && apt-get install -y build-essential
 
 # 安装常用的第三方库。
-RUN sbcl --eval "(ql:quickload '(cl-dbi hunchentoot swank yason))"
+RUN sbcl --eval "(ql:quickload '(cl-dbi hunchentoot local-time swank yason))"
 
 # COPY . /app/
 # # 将这个软件的目录做一个软链放到 quicklisp 的 local project 目录下。

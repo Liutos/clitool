@@ -20,6 +20,7 @@
           (list (list "/api/account/create" #'create-account)
                 (list "/api/account/delete" #'delete-account)
                 (list "/api/transfer/create" #'create-transfer)
+                (list "/api/transfer/list" #'list-transfer)
                 (list "/index.html" (make-static-file-handler "/app/src/web/html/index.html")))))
     (dolist (info path-handlers)
       (let ((path (first info))

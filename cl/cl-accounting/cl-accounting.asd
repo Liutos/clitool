@@ -7,6 +7,7 @@
                "bordeaux-threads"
                "cl-dbi"
                "hunchentoot"
+               "local-time"
                "swank"
                "yason"
                "uiop")
@@ -19,6 +20,8 @@
                                             :depends-on ("package"))
                                      (:file "delete-account"
                                             :depends-on ("condition" "package"))
+                                     (:file "list-transfer"
+                                            :depends-on ("package"))
                                      (:file "package")
                                      (:file "unit-of-work"
                                             :depends-on ("package")))
@@ -45,13 +48,15 @@
                (:module "web"
                         :components ((:file "create-account"
                                             :depends-on ("package"))
+                                     (:file "create-transfer"
+                                            :depends-on ("package"))
                                      (:file "delete-account"
+                                            :depends-on ("package"))
+                                     (:file "list-transfer"
                                             :depends-on ("package"))
                                      (:file "package")
                                      (:file "respond-css"
                                             :depends-on ("package"))
                                      (:file "server"
-                                            :depends-on ("package"))
-                                     (:file "create-transfer"
                                             :depends-on ("package")))
                         :depends-on ("app" "infra"))))
