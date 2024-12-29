@@ -8,7 +8,8 @@
                "cl-dbi"
                "hunchentoot"
                "swank"
-               "yason")
+               "yason"
+               "uiop")
   :components ((:module "app"
                         :components ((:file "condition"
                                             :depends-on ("package"))
@@ -47,6 +48,8 @@
                                      (:file "delete-account"
                                             :depends-on ("package"))
                                      (:file "package")
+                                     (:file "respond-css"
+                                            :depends-on ("package"))
                                      (:file "server"
                                             :depends-on ("package"))
                                      (:file "create-transfer"

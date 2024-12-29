@@ -19,13 +19,20 @@
   (let ((path-handlers
           (list (list "/api/account/create" #'create-account)
                 (list "/api/account/delete" #'delete-account)
-                (list "/api/transfer/create" #'create-transfer))))
+                (list "/api/transfer/create" #'create-transfer)
+                (list "/index.html" (make-static-file-handler "/app/src/web/html/index.html")))))
     (dolist (info path-handlers)
       (let ((path (first info))
             (handler (second info)))
         (push (hunchentoot:create-prefix-dispatcher path (lambda ()
                                                            (handle-business-error handler)))
-              hunchentoot:*dispatch-table*)))))
+              hunchentoot:*dispatch-table*)))
+
+    ;; 用正则表达式来匹配所有处理的 .css、.js 文件请求。
+    (push (hunchentoot:create-regex-dispatcher "/.*\\.css" #'respond-amis-css-file)
+          hunchentoot:*dispatch-table*)
+    (push (hunchentoot:create-regex-dispatcher "/.*\\.js" #'respond-amis-js-file)
+          hunchentoot:*dispatch-table*)))
 
 (defun init ()
   "初始化一个 WEB 服务器接收请求。"
