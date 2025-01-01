@@ -38,43 +38,85 @@
         let amisJSON = {
           type: 'page',
           title: '表单页面',
-          body: {
-            type: 'crud',
-            api: '/api/transfer/list',
-            syncLocation: false,
-            columns: [
-              {
-                label: 'id',
-                type: 'static',
-                name: 'id'
+          body: [
+            {
+              type: 'button',
+              actionType: 'dialog',
+              dialog: {
+                title: '新增账户',
+                body: {
+                  type: 'form',
+                  api: '/api/transfer/create',
+                  controls: [
+                    {
+                      type: 'input-text',
+                      label: '金额（元）',
+                      name: 'amount',
+                      required: true,
+                    },
+                    {
+                      type: 'text',
+                      label: '备注',
+                      name: 'comment',
+                    },
+                    {
+                      type: 'select',
+                      label: '流出账户',
+                      name: 'from_account_id',
+                      source: '/api/account/list',
+                      required: true,
+                    },
+                    {
+                      type: 'select',
+                      label: '流入账户',
+                      name: 'to_account_id',
+                      source: '/api/account/list',
+                      required: true,
+                    },
+                  ],
+                },
               },
-              {
-                label: '金额',
-                type: 'static',
-                name: 'amount'
-              },
-              {
-                label: '备注',
-                type: 'static',
-                name: 'comment'
-              },
-              {
-                label: '流出账户',
-                type: 'static',
-                name: 'from_account_name'
-              },
-              {
-                label: '流入账户',
-                type: 'static',
-                name: 'to_account_name'
-              },
-              {
-                label: '时间',
-                type: 'static',
-                name: 'created_at'
-              },
-            ]
-          }
+              label: '新增转账',
+              level: 'primary',
+            },
+            {
+              type: 'crud',
+              api: '/api/transfer/list',
+              syncLocation: false,
+              columns: [
+                {
+                  label: 'id',
+                  type: 'static',
+                  name: 'id'
+                },
+                {
+                  label: '金额',
+                  type: 'static',
+                  name: 'amount'
+                },
+                {
+                  label: '备注',
+                  type: 'static',
+                  name: 'comment'
+                },
+                {
+                  label: '流出账户',
+                  type: 'static',
+                  name: 'from_account_name'
+                },
+                {
+                  label: '流入账户',
+                  type: 'static',
+                  name: 'to_account_name'
+                },
+                {
+                  label: '时间',
+                  type: 'static',
+                  name: 'created_at'
+                },
+              ]
+            }
+          ]
         };
         let amisScoped = amis.embed('#root', amisJSON);
       })();

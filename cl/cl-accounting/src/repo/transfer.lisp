@@ -5,12 +5,13 @@
     :initarg :connection))
   (:documentation "将转账记录存储到 MySQL 中"))
 
-(defmethod create-transfer ((repo <mysql-transfer-repo>) amount from-account-id to-account-id)
+(defmethod create-transfer ((repo <mysql-transfer-repo>) amount from-account-id to-account-id
+                            &key (comment ""))
   (with-slots (connection) repo
     (dbi:do-sql
       connection
-      "INSERT INTO `t_transfer` (`amount`, `from_account_id`, `to_account_id`) VALUES (?, ?, ?)"
-      (list amount from-account-id to-account-id))))
+      "INSERT INTO `t_transfer` (`amount`, `comment`, `from_account_id`, `to_account_id`) VALUES (?, ?, ?, ?)"
+      (list amount comment from-account-id to-account-id))))
 
 (defmethod list-transfer ((repo <mysql-transfer-repo>))
   (with-slots (connection) repo

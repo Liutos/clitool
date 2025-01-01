@@ -6,6 +6,7 @@
            #:<create-account-handler>
            #:<create-transfer-handler>
            #:<delete-account-handler>
+           #:<list-account-handler>
            #:<list-transfer-handler>
            #:begin-transaction
            #:commit-transaction

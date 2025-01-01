@@ -54,6 +54,16 @@
             (convert-row-to-account row))
           nil))))
 
+(defmethod list-all-accounts ((repo <mysql-account-repo>))
+  (with-slots (connection)
+      repo
+    (let* ((prepared-statement
+             (dbi:prepare connection
+                          (format nil "SELECT * FROM `t_account`")))
+           (query (dbi:execute prepared-statement))
+           (rows (dbi:fetch-all query)))
+      (mapcar #'convert-row-to-account rows))))
+
 (defmethod list-by-parent-id ((repo <mysql-account-repo>) parent-id)
   (with-slots (connection)
       repo

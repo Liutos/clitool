@@ -7,12 +7,14 @@
                          :force-text t))
          (parsed (yason:parse raw-post-data))
          (amount (gethash "amount" parsed))
+         (comment (gethash "comment" parsed))
          (from-account-id (gethash "from_account_id" parsed))
          (to-account-id (gethash "to_account_id" parsed))
          (connection (cl-accounting.infra:get-connection))
          (handler
            (make-instance 'cl-accounting.app:<create-transfer-handler>
                           :amount amount
+                          :comment comment
                           :from-account-id from-account-id
                           :to-account-id to-account-id
                           :uow (cl-accounting.repo:new-mysql-unit-of-work connection))))

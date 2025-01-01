@@ -23,7 +23,8 @@
   (:documentation "转账记录"))
 
 ;;; 定义 repo 接口。
-(defgeneric create-transfer (repo amount from-account-id to-account-id)
+(defgeneric create-transfer (repo amount from-account-id to-account-id
+                             &key comment)
   (:documentation "新增一笔转账。"))
 
 (defgeneric list-transfer (repo)

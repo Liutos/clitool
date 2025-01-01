@@ -20,6 +20,8 @@
                                             :depends-on ("package"))
                                      (:file "delete-account"
                                             :depends-on ("condition" "package"))
+                                     (:file "list-account"
+                                            :depends-on ("package"))
                                      (:file "list-transfer"
                                             :depends-on ("package"))
                                      (:file "package")
@@ -51,6 +53,8 @@
                                      (:file "create-transfer"
                                             :depends-on ("package"))
                                      (:file "delete-account"
+                                            :depends-on ("package"))
+                                     (:file "list-account"
                                             :depends-on ("package"))
                                      (:file "list-transfer"
                                             :depends-on ("package"))

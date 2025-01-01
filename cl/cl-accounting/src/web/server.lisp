@@ -19,6 +19,7 @@
   (let ((path-handlers
           (list (list "/api/account/create" #'create-account)
                 (list "/api/account/delete" #'delete-account)
+                (list "/api/account/list" #'list-account)
                 (list "/api/transfer/create" #'create-transfer)
                 (list "/api/transfer/list" #'list-transfer)
                 (list "/index.html" (make-static-file-handler "/app/src/web/html/index.html")))))

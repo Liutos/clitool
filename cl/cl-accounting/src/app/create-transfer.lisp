@@ -3,6 +3,8 @@
 (defclass <create-transfer-handler> ()
   ((amount
     :initarg :amount)
+   (comment
+    :initarg :comment)
    (from-account-id
     :initarg :from-account-id)
    (to-account-id
@@ -12,7 +14,7 @@
   (:documentation "处理新增转账的请求。"))
 
 (defmethod run-handler ((handler <create-transfer-handler>))
-  (with-slots (amount from-account-id to-account-id uow)
+  (with-slots (amount comment from-account-id to-account-id uow)
       handler
     ;; 参数校验。
     (unless amount
@@ -40,7 +42,8 @@
              transfer-repo
              amount
              from-account-id
-             to-account-id)
+             to-account-id
+             :comment comment)
             (commit-transaction uow))
         (t (var)
           ;; 回滚数据库事务，并继续往上抛出异常。

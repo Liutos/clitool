@@ -5,7 +5,8 @@
    (balance
     :initarg :balance)
    (id
-    :initarg :id)
+    :initarg :id
+    :reader account-id)
    (name
     :initarg :name
     :reader account-name)
@@ -33,6 +34,9 @@
 
 (defgeneric get-by-name (repo name)
   (:documentation "基于名称来查找账户。"))
+
+(defgeneric list-all-accounts (repo)
+  (:documentation "列出所有账户。"))
 
 (defgeneric list-by-parent-id (repo parent-id)
   (:documentation "查询指定的 parent_id 的账户。"))

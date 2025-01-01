@@ -3,7 +3,8 @@
 (defpackage #:cl-accounting.infra
   (:use #:cl)
   (:export #:get-connection
-           #:init))
+           #:init
+           #:with-connection))
 
 (in-package #:cl-accounting.infra)
 
@@ -24,3 +25,13 @@
                      :database-name (uiop:getenv "MYSQL_DATABASE_NAME")
                      :username (uiop:getenv "MYSQL_USERNAME")
                      :password (uiop:getenv "MYSQL_PASSWORD"))))
+
+(defmacro with-connection ((connection) &body body)
+  "封装一下 dbi:with-connection。"
+  `(dbi:with-connection (,connection
+                         :mysql
+                         :host (uiop:getenv "MYSQL_HOST")
+                         :database-name (uiop:getenv "MYSQL_DATABASE_NAME")
+                         :username (uiop:getenv "MYSQL_USERNAME")
+                         :password (uiop:getenv "MYSQL_PASSWORD"))
+     ,@body))
