@@ -46,6 +46,33 @@
                 title: '新增账户',
                 body: {
                   type: 'form',
+                  api: '/api/account/create',
+                  controls: [
+                    {
+                      type: 'text',
+                      label: '账户名称',
+                      name: 'name',
+                      required: true,
+                    },
+                    {
+                      type: 'select',
+                      label: '父级账户',
+                      name: 'parent_id',
+                      source: '/api/account/list',
+                    },
+                  ],
+                },
+              },
+              label: '新增账户',
+              level: 'primary',
+            },
+            {
+              type: 'button',
+              actionType: 'dialog',
+              dialog: {
+                title: '新增转账',
+                body: {
+                  type: 'form',
                   api: '/api/transfer/create',
                   controls: [
                     {
