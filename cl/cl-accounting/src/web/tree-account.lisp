@@ -8,7 +8,7 @@
                             :uow (cl-accounting.repo:new-mysql-unit-of-work connection))))
       (let* ((options (cl-accounting.app:run-handler handler))
              (data (make-hash-table)))
-        (setf (gethash "account_options" data) options)
+        (setf (gethash "options" data) options)
         ;; TODO: 将这里的 with-output-to-string 的用法改为一个装饰器或中间件。
         (with-output-to-string (s)
           (setf (hunchentoot:content-type*) "Content-Type: application/json")
