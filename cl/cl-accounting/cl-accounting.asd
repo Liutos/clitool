@@ -25,8 +25,10 @@
                                      (:file "list-transfer"
                                             :depends-on ("package"))
                                      (:file "package")
+                                     (:file "tree-account"
+                                            :depends-on ("package"))
                                      (:file "unit-of-work"
-                                            :depends-on ("package")))
+                                      :depends-on ("package")))
                         :depends-on ("entity"))
                (:module "entity"
                         :components ((:file "package")
@@ -62,5 +64,8 @@
                                      (:file "respond-css"
                                             :depends-on ("package"))
                                      (:file "server"
+                                            :depends-on ("package"
+                                                         "tree-account"))
+                                     (:file "tree-account"
                                             :depends-on ("package")))
                         :depends-on ("app" "infra"))))

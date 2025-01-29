@@ -8,6 +8,7 @@
            #:<delete-account-handler>
            #:<list-account-handler>
            #:<list-transfer-handler>
+           #:<tree-account-handler>
            #:begin-transaction
            #:commit-transaction
            #:get-account-repo

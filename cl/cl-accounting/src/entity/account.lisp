@@ -11,7 +11,8 @@
     :initarg :name
     :reader account-name)
    (parent-id
-    :initarg :parent-id)
+    :initarg :parent-id
+    :reader account-parent-id)
    (updated-at))
   (:documentation "账户"))
 
