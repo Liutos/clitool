@@ -9,12 +9,15 @@
     :initarg :from-account-id)
    (to-account-id
     :initarg :to-account-id)
+   (transfer-at
+    :documentation "转账发生的日期。"
+    :initarg :transfer-at)
    (uow
     :initarg :uow))
   (:documentation "处理新增转账的请求。"))
 
 (defmethod run-handler ((handler <create-transfer-handler>))
-  (with-slots (amount comment from-account-id to-account-id uow)
+  (with-slots (amount comment from-account-id to-account-id transfer-at uow)
       handler
     ;; 参数校验。
     (unless amount
@@ -22,8 +25,15 @@
 
     (unless (stringp amount)
       (error '<business-error> :msg "参数 amount 必须是字符串类型"))
+
+    (unless transfer-at
+      (error '<business-error> :msg "参数 transfer_at 不能为空。"))
+
+    (unless (stringp transfer-at)
+      (error '<business-error> :msg "参数 transfer_at 必须是字符串类型。"))
     ;; 校验 ID 有效性。
     (let ((account-repo (get-account-repo uow))
+          (parsed-transfer-at (parse-date transfer-at))
           (transfer-repo (get-transfer-repo uow)))
       ;; TODO: 将 begin-transaction/handler-case 等用法封装为一个高阶函数或者宏。
       (begin-transaction uow)
@@ -43,9 +53,19 @@
              amount
              from-account-id
              to-account-id
-             :comment comment)
+             :comment comment
+             :transfer-at parsed-transfer-at)
             (commit-transaction uow))
         (t (var)
           ;; 回滚数据库事务，并继续往上抛出异常。
           (rollback-transaction uow)
           (error var))))))
+
+(defun parse-date (date-string)
+  "将日期字符串 DATE-STRING 按照 yyyy-mm-dd 的格式解析成 local-time:timestamp 对象。"
+  (cl-ppcre:register-groups-bind (year month date)
+      ("^([0-9]{4})-([0-9]{2})-([0-9]{2})$" date-string)
+    (unless (and year month date)
+      (error '<business-error> :msg "日期字符串必须是 yyyy-mm-dd 的格式。"))
+
+    (local-time:encode-timestamp 0 0 0 0 (parse-integer date) (parse-integer month) (parse-integer year))))

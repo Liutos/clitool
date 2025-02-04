@@ -6,6 +6,7 @@
   :depends-on ("alexandria"
                "bordeaux-threads"
                "cl-dbi"
+               "cl-ppcre"
                "hunchentoot"
                "local-time"
                "swank"

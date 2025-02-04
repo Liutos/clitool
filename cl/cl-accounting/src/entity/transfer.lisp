@@ -19,12 +19,15 @@
    (to-account-id
     :initarg :to-account-id
     :reader transfer-to-account-id)
+   (transfer-at
+    :documentation "转账发生的日期。"
+    :initarg :transfer-at)
    (updated-at))
   (:documentation "转账记录"))
 
 ;;; 定义 repo 接口。
 (defgeneric create-transfer (repo amount from-account-id to-account-id
-                             &key comment)
+                             &key comment transfer-at)
   (:documentation "新增一笔转账。"))
 
 (defgeneric list-transfer (repo)
