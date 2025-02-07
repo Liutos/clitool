@@ -15,6 +15,10 @@
 (defmethod create-account ((repo <mysql-account-repo>) name parent-id)
   (with-slots (connection)
       repo
+    ;; 由于数据库中该列不允许为 NULL，因此需要初始化为与列相同的默认值。
+    (unless parent-id
+      (setf parent-id 0))
+
     (dbi:do-sql
       connection
       "INSERT INTO `t_account` (`balance`, `name`, `parent_id`) VALUES (?, ?, ?)"
