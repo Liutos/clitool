@@ -55,11 +55,30 @@
              to-account-id
              :comment comment
              :transfer-at parsed-transfer-at)
+            ;; 计算余额并更新到 t_account 表中。
+            (let ((from-account-balance (compute-account-balance from-account-id transfer-repo))
+                  (to-account-balance (compute-account-balance to-account-id transfer-repo)))
+              (cl-accounting.entity:update-balance account-repo from-account-id from-account-balance)
+              (cl-accounting.entity:update-balance account-repo to-account-id to-account-balance))
+
             (commit-transaction uow))
         (t (var)
           ;; 回滚数据库事务，并继续往上抛出异常。
           (rollback-transaction uow)
           (error var))))))
+
+(defun compute-account-balance (account-id transfer-repo)
+  "计算给定账户 ACCOUNT-ID 的余额。"
+  (let ((flow-in (cl-accounting.entity:list-by-to-account-id transfer-repo account-id))
+        (flow-out (cl-accounting.entity:list-by-from-account-id transfer-repo account-id)))
+    ;; flow-in 存储的是流入 account-id 的转账记录，那么它的金额会导致目标账户余额增加，flow-out 则相反。
+    (flet ((sum-flow (transfers)
+             (apply #'+ (mapcar #'(lambda (transfer)
+                                    (cl-accounting.entity:transfer-amount transfer))
+                                transfers))))
+      (let ((total-in (sum-flow flow-in))
+            (total-out (sum-flow flow-out)))
+        (- total-in total-out)))))
 
 (defun parse-date (date-string)
   "将日期字符串 DATE-STRING 按照 yyyy-mm-dd 的格式解析成 local-time:timestamp 对象。"

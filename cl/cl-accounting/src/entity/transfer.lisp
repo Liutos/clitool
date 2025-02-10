@@ -30,5 +30,11 @@
                              &key comment transfer-at)
   (:documentation "新增一笔转账。"))
 
+(defgeneric list-by-from-account-id (repo from-account-id)
+  (:documentation "列出从给定的 FROM-ACCOUNT-ID 流出的转账记录。"))
+
+(defgeneric list-by-to-account-id (repo to-account-id)
+  (:documentation "列出往给定的 TO-ACCOUNT-ID 流入的转账记录。"))
+
 (defgeneric list-transfer (repo)
   (:documentation "列出转账记录。"))

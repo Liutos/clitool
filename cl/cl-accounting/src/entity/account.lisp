@@ -44,3 +44,6 @@
 
 (defgeneric lock-account-by-id (repo id)
   (:documentation "用主键锁定一行账户记录。"))
+
+(defgeneric update-balance (repo id balance)
+  (:documentation "更新给定账户的余额。"))

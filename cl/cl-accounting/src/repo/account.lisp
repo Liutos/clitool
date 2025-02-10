@@ -81,6 +81,14 @@
 (defmethod lock-account-by-id ((repo <mysql-account-repo>) id)
   (get-by-unique-key repo "id" id :for-update t))
 
+(defmethod update-balance ((repo <mysql-account-repo>) id balance)
+  (with-slots (connection)
+      repo
+    (dbi:do-sql
+      connection
+      "UPDATE `t_account` SET `balance` = ? WHERE `id` = ?"
+      (list balance id))))
+
 (defun new-mysql-account-repo (connection)
   (make-instance '<mysql-account-repo>
                  :connection connection))

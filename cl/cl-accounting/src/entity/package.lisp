@@ -13,7 +13,9 @@
            #:get-account
            #:get-by-name
            #:list-all-accounts
+           #:list-by-from-account-id
            #:list-by-parent-id
+           #:list-by-to-account-id
            #:list-transfer
            #:lock-account-by-id
            #:transfer-amount
@@ -21,4 +23,5 @@
            #:transfer-created-at
            #:transfer-from-account-id
            #:transfer-id
-           #:transfer-to-account-id))
+           #:transfer-to-account-id
+           #:update-balance))
